@@ -18,7 +18,6 @@ export default function FeedPage() {
 const APIURL = import.meta.env.VITE_API_BASE_URL
 
 
-
 const handleSaveToggle = async (postId) => {
   const username = localStorage.getItem("username");
   const mode = profileMode;
@@ -81,6 +80,7 @@ const handleLikeToggle = async (postId) => {
     const response = await axios.post(`${APIURL}/likeunlike/toggle-like`, {
       postId,
       username,
+      
     });
 
     if (response.status === 200) {
@@ -133,6 +133,38 @@ const handleLikeToggle = async (postId) => {
       console.error("Error fetching social posts:", err);
     } 
   };
+
+const fetchProfessionalPosts = async () => {
+  try {
+    const jwtToken = localStorage.getItem("jwtToken");
+
+    if (!jwtToken) {
+      alert("You must be logged in to view posts.");
+      return;
+    }
+
+    const response = await fetch(`${APIURL}/fetchposts/fetchprofessionalposts`, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${jwtToken}`,
+      },
+    });
+
+    const data = await response.json();
+
+    if (response.ok && data.success) {
+      setPosts(data.posts);
+      console.log(data.posts);
+    } else {
+      console.error(data.message || "Failed to fetch professional posts");
+    }
+  } catch (error) {
+    console.error("Error fetching professional posts:", error);
+  }
+};
+
+
+
 
  useEffect(() => {
    
@@ -210,7 +242,12 @@ const handleLikeToggle = async (postId) => {
                       />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-gray-900">{post.authorName}</h3>
+                      <div className="flex gap-2 font-extrabold"  ><h3 className="font-semibold text-gray-900">{post.authorName}</h3> {isProfessional ? (
+  <span className="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded-full">P</span>
+) : (
+  <span className="text-xs bg-indigo-50 text-indigo-700 px-2 py-1 rounded-full">S</span>
+)}
+</div>
                       <div className="flex items-center gap-2">
 <p className="text-xs text-gray-500">
   {new Date(post.timestamp).toLocaleString("en-US", {
@@ -220,9 +257,7 @@ const handleLikeToggle = async (postId) => {
     hour: "2-digit",
     minute: "2-digit",
   })}
-</p>                        {isProfessional && (
-                          <span className="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded-full">Pro</span>
-                        )}
+</p>                       
                       </div>
                     </div>
                   </div>
@@ -284,33 +319,45 @@ const handleLikeToggle = async (postId) => {
   </div>
 )}
 
-                {/* Poll Display (Professional Mode) */}
-                {post.type === "poll" && post.poll && isProfessional && (
-                  <div className="space-y-3 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-100">
-                    <h4 className="font-medium text-blue-900">{post.poll.question}</h4>
-                    <div className="space-y-2">
-                      {post.poll.options.map((option, idx) => {
-                        const percentage = (option.votes / post.poll.totalVotes) * 100
-                        return (
-                          <div key={idx} className="relative overflow-hidden">
-                            <div className="flex justify-between items-center p-3 bg-white rounded-lg border border-blue-200 relative z-10">
-                              <span className="font-medium text-sm">{option.text}</span>
-                              <div className="text-right">
-                                <span className="text-blue-700 font-semibold text-sm">{Math.round(percentage)}%</span>
-                                <p className="text-xs text-gray-500">{option.votes} votes</p>
-                              </div>
-                            </div>
-                            <div
-                              className="absolute left-0 top-0 h-full bg-gradient-to-r from-blue-200 to-indigo-200 rounded-lg opacity-30"
-                              style={{ width: `${percentage}%` }}
-                            />
-                          </div>
-                        )
-                      })}
-                    </div>
-                    <p className="text-xs text-blue-600 font-medium">{post.poll.totalVotes} total votes</p>
-                  </div>
-                )}
+               {/* Poll Display (Professional Mode) */}
+{post.Poll && isProfessional && (
+  <div className="space-y-3 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-100">
+    <div className="space-y-2">
+      {post.Poll.options.map((option, idx) => {
+        const voteEntry = post.Poll.votes.find(v => v.option === option);
+        const voteCount = voteEntry?.count || 0;
+
+        // Calculate total votes
+        const totalVotes = post.Poll.votes.reduce((acc, v) => acc + v.count, 0);
+        const percentage = totalVotes ? (voteCount / totalVotes) * 100 : 0;
+
+        return (
+          <div key={idx} className="relative overflow-hidden">
+            <div className="flex justify-between items-center p-3 bg-white rounded-lg border border-blue-200 relative z-10">
+              <span className="font-medium text-sm">{option}</span>
+              <div className="text-right">
+                <span className="text-blue-700 font-semibold text-sm">
+                  {Math.round(percentage)}%
+                </span>
+                <p className="text-xs text-gray-500">{voteCount} votes</p>
+              </div>
+            </div>
+            <div
+              className="absolute left-0 top-0 h-full bg-gradient-to-r from-blue-200 to-indigo-200 rounded-lg opacity-30"
+              style={{ width: `${percentage}%` }}
+            />
+          </div>
+        );
+      })}
+    </div>
+    <p className="text-xs text-blue-600 font-medium">
+      {
+        post.Poll.votes.reduce((acc, v) => acc + v.count, 0)
+      } total votes
+    </p>
+  </div>
+)}
+
 
                 {/* Action Buttons */}
                 <div className="flex items-center justify-between pt-4 border-t border-gray-100">
@@ -322,14 +369,14 @@ const handleLikeToggle = async (postId) => {
                           className="text-green-600 hover:text-green-700 hover:bg-green-50 px-3 py-1 rounded-lg flex items-center transition-colors"
                         >
                           <ThumbsUp className="w-4 h-4 mr-1" />
-                          <span className="font-medium text-sm">{post.stats.upvotes}</span>
+                          <span className="font-medium text-sm">{post.numberOfUpvotes}</span>
                         </button>
                         <button
                           onClick={() => handleVote(post.id, "downvote")}
                           className="text-red-600 hover:text-red-700 hover:bg-red-50 px-3 py-1 rounded-lg flex items-center transition-colors"
                         >
                           <ThumbsDown className="w-4 h-4 mr-1" />
-                          <span className="font-medium text-sm">{post.stats.downvotes}</span>
+                          <span className="font-medium text-sm">{post.numberOfDownvotes}</span>
                         </button>
                       </>
                     ) : (
@@ -360,7 +407,7 @@ post.numberOfComments
                   </div>
 
                  <button
-  onClick={() => handleSaveToggle(post.postId, isProfessional ? "professional" : "social", posts, setPosts)}
+  onClick={() => handleSaveToggle(post.postId)}
   className={`px-3 py-1 rounded-lg flex items-center transition-colors ${
     post.isSaved
       ? "text-orange-700 bg-orange-50"          // style when saved

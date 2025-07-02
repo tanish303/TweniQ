@@ -96,7 +96,7 @@ router.post('/createsocialpost', async (req, res) => {
 
 
 router.post('/createprofessionalpost', async (req, res) => {
-  const { title, content, anonymousPoll } = req.body;
+  const { title, content, Poll } = req.body;
 
   if (!title || !content) {
     return res.status(400).json({ success: false, message: "All required fields must be provided" });
@@ -117,7 +117,7 @@ router.post('/createprofessionalpost', async (req, res) => {
       createdBy: user._id, // Use the user's ObjectId
       title,
       content,
-      anonymousPoll,
+      Poll,
     });
 
     await newPost.save();

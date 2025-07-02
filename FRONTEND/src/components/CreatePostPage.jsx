@@ -91,7 +91,7 @@ const doesfriendexists = async () => {
   const postData = {
     title,
     content,
-    anonymousPoll: {
+    Poll: {
       options: pollOptions.map((option) => option.text).filter((text) => text), // Non-empty options
     },
   };
