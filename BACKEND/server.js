@@ -8,6 +8,7 @@ const Resetpassword = require('./Routes/Resetpassword');
 const CreatePost = require('./Routes/CreatePost');
 const FetchPosts = require('./Routes/FetchPosts');
 const FF = require('./Routes/Follow-Following');
+const LikeUnlike = require('./Routes/LikeUnlike');
 
 
 const app = express();
@@ -20,6 +21,7 @@ app.use('/resetpassword', Resetpassword);
 app.use('/createpost', CreatePost);
 app.use('/fetchposts', FetchPosts);
 app.use('/ff', FF);
+app.use('/likeunlike', LikeUnlike);
 
 const port = 3000;
 app.listen(port, () => {
