@@ -5,15 +5,20 @@ const SocialPost = require('../Models/SocialPost');
 const ProfessionalPost = require('../Models/ProfessionalPost');
 const jwt = require("jsonwebtoken");
 
+
+
 router.get('/fetchsocialposts', async (req, res) => {
   try {
     const token = req.headers.authorization?.split(' ')[1]; // Extract JWT token
+
     if (!token) {
       return res.status(401).json({ success: false, message: 'Authorization token is required' });
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET); // Decode JWT
     const currentUserId = decoded.userId; // Current user's ID from the token
+
+    console.log("Decoded JWT:", decoded);
 
     const posts = await SocialPost.find()
       .populate('createdBy', 'username') // Populate `createdBy` field to get the `username`
@@ -30,26 +35,30 @@ router.get('/fetchsocialposts', async (req, res) => {
           taggedFriendName = taggedFriend?.username || null;
         }
 
-        // Map comments to include username and text
+        // Format comments
         const formattedComments = post.comments.map(comment => ({
           username: comment.commentedBy?.username || 'Unknown',
           text: comment.comment,
         }));
 
-        // Fetch the full author object to get followers
+        // Get author's followers
         const author = await User.findById(post.createdBy._id).lean();
         if (!author) {
           console.error(`Author not found for post: ${post._id}`);
           return null;
         }
 
-        // Convert `followers` IDs to strings for comparison
-        const followers = author.followers.map(follower => follower.toString());
+        const followers = Array.isArray(author.followers)
+          ? author.followers.map(f => f.toString())
+          : [];
 
-        // Check if the current user follows the author
+        // Debug Logs
+        console.log("Post ID:", post._id);
+        console.log("Author:", post.createdBy.username);
+        console.log("Author Followers:", followers);
+        console.log("Current User ID:", currentUserId);
+
         const isFollowing = followers.includes(currentUserId);
-
-        // Check if the current user liked the post
         const isLiked = post.likes.some((like) => like.toString() === currentUserId);
 
         return {
@@ -64,16 +73,15 @@ router.get('/fetchsocialposts', async (req, res) => {
           numberOfLikes: post.likes.length || 0,
           numberOfComments: post.comments.length || 0,
           comments: formattedComments,
-          isFollowing, // Whether the current user follows the author
-          isLiked, // Whether the current user liked the post
+          isFollowing,
+          isLiked,
         };
       })
     );
 
-    // Filter out null posts (in case of errors)
-    const validPosts = formattedPosts.filter((post) => post !== null);
-
+    const validPosts = formattedPosts.filter(post => post !== null);
     res.status(200).json({ success: true, posts: validPosts });
+
   } catch (error) {
     console.error("Error fetching social posts:", error);
     res.status(500).json({ success: false, message: "Failed to fetch social posts" });

@@ -36,7 +36,6 @@ router.post("/sendotp", async (req, res) => {
       {
         otp,
         otpExpiresAt: Date.now() + 10 * 60 * 1000, // OTP expires in 10 minutes
-        username: email.split("@")[0], // Assign a default username for new users
       },
       { upsert: true }
     );
@@ -140,33 +139,33 @@ router.post('/saveprofiledata', async (req, res) => {
   } = req.body;
 
   try {
-    // Find the user by email
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Update the user profile
     user.username = username || user.username;
 
-    // Hash the password if it is being updated
-      const hashedPassword = await bcrypt.hash(password, 10);
-      user.password = hashedPassword;
-    
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+    user.password = hashedPassword;
 
-    user.socialProfile = {
-      ...user.socialProfile,
-      ...socialProfile,
-    };
-    user.professionalProfile = {
-      ...user.professionalProfile,
-      ...professionalProfile,
-    };
+    user.socialProfile = { ...user.socialProfile, ...socialProfile };
+    user.professionalProfile = { ...user.professionalProfile, ...professionalProfile };
 
-    // Save the updated user
     await user.save();
 
-    return res.status(200).json({ message: "Profile updated successfully", user });
+    // ✅ Create JWT Token
+    const token = jwt.sign(
+      { userId: user._id },
+      process.env.JWT_SECRET
+    );
+
+    return res.status(200).json({
+      message: "Profile updated successfully",
+      jwtToken: token,
+      username: user.username,
+    });
   } catch (error) {
     console.error("Error updating user profile:", error);
     return res.status(500).json({ message: "An error occurred", error });

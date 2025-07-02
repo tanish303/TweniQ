@@ -2,6 +2,8 @@
 
 import { useState } from "react"
 import { motion } from "framer-motion"
+import { useNavigate } from "react-router-dom"
+
 import {
   User,
   Bookmark,
@@ -52,7 +54,15 @@ export default function AccountPage() {
   const { profileMode } = useProfile()
   const [activeSection, setActiveSection] = useState(null)
   const isProfessional = profileMode === "professional"
+  const navigate = useNavigate();
+
   const stats = isProfessional ? userStats.professional : userStats.social
+const logout = () => {
+    localStorage.removeItem("jwtToken");
+    localStorage.removeItem("username");
+   
+    navigate("/"); // Optional redirect
+  };
 
   const actionButtons = [
     {
@@ -167,7 +177,7 @@ export default function AccountPage() {
           Manage your {isProfessional ? "professional" : "social"} profile and preferences
         </p>
       </motion.div>
-
+ <button onClick={logout} className="bg-amber-400">logout</button>
       <div className="grid lg:grid-cols-4 gap-6">
         {/* Profile Card */}
         <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="lg:col-span-1">

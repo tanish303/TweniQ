@@ -41,7 +41,9 @@ router.post('/createsocialpost', async (req, res) => {
     // Extract user information from token
     const token = req.headers.authorization.split(" ")[1]; // Assuming token is sent as "Bearer <token>"
     const decoded = jwt.verify(token, process.env.JWT_SECRET); // Use your JWT secret
-    const user = await User.findById(decoded.id); // Fetch user from database
+    const user = await User.findById(decoded.userId); // Fetch user from database
+        console.log(decoded);
+
 
     if (!user) {
       return res.status(404).json({ success: false, message: "User not found" });
@@ -104,7 +106,7 @@ router.post('/createprofessionalpost', async (req, res) => {
     // Extract token from the Authorization header
     const token = req.headers.authorization.split(" ")[1]; // "Bearer <token>"
     const decoded = jwt.verify(token, process.env.JWT_SECRET); // Use your JWT secret
-    const user = await User.findById(decoded.id); // Fetch the user from the database
+    const user = await User.findById(decoded.userId); // Fetch the user from the database
 
     if (!user) {
       return res.status(404).json({ success: false, message: "User not found" });

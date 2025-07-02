@@ -5,6 +5,8 @@ import { useLocation } from "react-router-dom"
 import axios from "axios"
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
+import { useApp } from "../context/AppContext"; 
+
 
 import { User, Lock, Briefcase, Heart, FileText, CheckCircle, XCircle, Eye, EyeOff, Sparkles } from "lucide-react"
 
@@ -104,6 +106,7 @@ const Setupprofile = () => {
     const navigate = useNavigate();
   
   const email = location.state?.email
+  const { globalusername, setglobalusername } = useApp();
 
   const [formData, setFormData] = useState({
     username: "",
@@ -172,6 +175,7 @@ const Setupprofile = () => {
     }
   }
 
+ 
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (usernameStatus !== "available") {
@@ -203,6 +207,13 @@ const Setupprofile = () => {
       })
 
       if (response.status === 200) {
+              const { jwtToken, username } = response.data;
+
+         localStorage.setItem("jwtToken", jwtToken);
+      localStorage.setItem("username", username);
+
+      // Save to global context/state
+      setglobalusername(username);
         setShowSuccessToast(true)
       } else {
         alert("Failed to create user")
