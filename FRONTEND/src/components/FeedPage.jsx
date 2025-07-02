@@ -2,9 +2,10 @@
 
 import { useState } from "react"
 import { motion } from "framer-motion"
-import { ThumbsUp, ThumbsDown, MessageCircle, Bookmark, Heart, MoreHorizontal, UserPlus, Check } from "lucide-react"
+import { ThumbsUp, ThumbsDown, MessageCircle, Bookmark, Heart, UserPlus, Check } from "lucide-react"
 import { useProfile ,useApp} from "../context/AppContext"
 import { useEffect } from "react"
+import axios from 'axios';
 
 
  
@@ -46,47 +47,31 @@ const APIURL = import.meta.env.VITE_API_BASE_URL
     )
   }
 
-const handleFollowButtonClick = async (whomToFollow) => {
-  const APIURL = import.meta.env.VITE_API_BASE_URL;
+const handleToggleFollow = async (authorName, postId, posts, setPosts) => {
+  const currentUsername = localStorage.getItem("username"); // Fetch from localStorage
 
-  // Retrieve the currently logged-in user's username from localStorage
-  const whoIsFollowing = localStorage.getItem("username"); 
-
-  if (!whoIsFollowing || !whomToFollow) {
-    alert("Invalid follow action. Missing required data.");
+  if (!currentUsername) {
+    console.error("No username found in localStorage.");
     return;
   }
 
   try {
-    const jwtToken = localStorage.getItem("jwtToken"); // Retrieve JWT token
-
-    if (!jwtToken) {
-      alert("You must be logged in to follow users.");
-      return;
-    }
-
-    const response = await fetch(`${APIURL}/FF/follow`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${jwtToken}`, // Pass JWT token in headers
-      },
-      body: JSON.stringify({ whoIsFollowing, whomToFollow }),
+    const response = await axios.post(`${APIURL}/ff/toggle-follow`, {
+      targetUsername: authorName,
+      currentUsername: currentUsername,
     });
 
-    const data = await response.json();
-
-    if (response.ok && data.success) {
-      alert("Follow action successful!");
-      // Update UI or state here to reflect the follow status, if necessary
-    } else {
-      alert(data.message || "Failed to follow user. Please try again.");
+    if (response.status === 200) {
+      const updatedPosts = posts.map((post) =>
+        post.postId === postId ? { ...post, isFollowing: response.data.isFollowing } : post
+      );
+      setPosts(updatedPosts);
     }
   } catch (error) {
-    console.error("Error while performing follow action:", error);
-    alert("An error occurred. Please try again later.");
+    console.error("Error toggling follow:", error);
   }
 };
+
 
 
    const fetchSocialPosts = async () => {
@@ -213,7 +198,7 @@ const handleFollowButtonClick = async (whomToFollow) => {
 
                   <div className="flex items-center gap-2">
                     <button
-                      onClick={() => handleFollowButtonClick(post.authorName)}
+                    onClick={() => handleToggleFollow(post.authorName, post.postId, posts, setPosts)}
                       className={`text-xs transition-all duration-200 px-3 py-1 rounded-md border ${
                         post.isFollowing
                           ? isProfessional

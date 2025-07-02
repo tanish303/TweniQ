@@ -1,44 +1,67 @@
 const express = require('express');
 const router = express.Router();
-const User = require('../Models/User'); // Adjust the path to your User model
+const User = require('../Models/User'); // Adjust path as needed
 
-router.post('/follow', async (req, res) => {
-  const { whomToFollow, whoIsFollowing } = req.body;
+router.post('/toggle-follow', async (req, res) => {
+  const { targetUsername, currentUsername } = req.body;
 
-  if (!whomToFollow || !whoIsFollowing) {
+  if (!targetUsername || !currentUsername) {
     return res.status(400).json({ success: false, message: "Both usernames must be provided" });
   }
 
   try {
-    // Fetch both users
-    const follower = await User.findOne({ username: whoIsFollowing });
-    const followee = await User.findOne({ username: whomToFollow });
+    const currentUser = await User.findOne({ username: currentUsername });
+    const targetUser = await User.findOne({ username: targetUsername });
 
-    if (!follower || !followee) {
-      return res.status(404).json({ success: false, message: "One or both users not found" });
+    if (!currentUser || !targetUser) {
+      return res.status(404).json({ success: false, message: "User(s) not found" });
     }
 
-    // Check if already following
-    if (follower.following.includes(followee._id)) {
-      return res.status(400).json({ success: false, message: "Already following this user" });
+    const alreadyFollowing = currentUser.following.includes(targetUser._id);
+
+    if (alreadyFollowing) {
+      // UNFOLLOW logic
+      await User.updateOne(
+        { _id: currentUser._id },
+        {
+          $pull: { following: targetUser._id },
+          $inc: { followingCount: -1 }
+        }
+      );
+
+      await User.updateOne(
+        { _id: targetUser._id },
+        {
+          $pull: { followers: currentUser._id },
+          $inc: { followersCount: -1 }
+        }
+      );
+
+      return res.status(200).json({ success: true, message: "Unfollowed successfully", isFollowing: false });
+    } else {
+      // FOLLOW logic
+      await User.updateOne(
+        { _id: currentUser._id },
+        {
+          $addToSet: { following: targetUser._id },
+          $inc: { followingCount: 1 }
+        }
+      );
+
+      await User.updateOne(
+        { _id: targetUser._id },
+        {
+          $addToSet: { followers: currentUser._id },
+          $inc: { followersCount: 1 }
+        }
+      );
+
+      return res.status(200).json({ success: true, message: "Followed successfully", isFollowing: true });
     }
 
-    // Update the followee (whomToFollow)
-    followee.followers.push(follower._id);
-    followee.followersCount += 1;
-
-    // Update the follower (whoIsFollowing)
-    follower.following.push(followee._id);
-    follower.followingCount += 1;
-
-    // Save both users
-    await followee.save();
-    await follower.save();
-
-    res.status(200).json({ success: true, message: "Successfully followed the user" });
   } catch (error) {
-    console.error("Error in follow route:", error);
-    res.status(500).json({ success: false, message: "An error occurred while following the user" });
+    console.error("Error in toggle-follow route:", error);
+    return res.status(500).json({ success: false, message: "An error occurred while toggling follow status" });
   }
 });
 
