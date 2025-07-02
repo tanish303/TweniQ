@@ -17,15 +17,39 @@ export default function FeedPage() {
   const isProfessional = profileMode === "professional"
 const APIURL = import.meta.env.VITE_API_BASE_URL
 
-  const handleVote = (postId, type) => {
-   
+
+
+const handleSaveToggle = async (postId) => {
+  const username = localStorage.getItem("username");
+  const mode = profileMode;
+  console.log(mode);
+  if (!username || !mode) {
+    console.error("Missing userId or mode");
+    return;
   }
 
-  const handleSave = (postId) => {
-    
-  }
+  try {
+    const { data } = await axios.post(`${APIURL}/savepost/toggle-save-post`, {
+      username,
+      postId,
+      mode,
+    });
 
-const handleToggleFollow = async (authorName, postId, posts, setPosts) => {
+    if (data.success) {
+      setPosts((prev) =>
+        prev.map((post) =>
+          post.postId === postId ? { ...post, isSaved: data.isSaved } : post
+        )
+      );
+    } else {
+      console.warn("Failed to toggle save status");
+    }
+  } catch (err) {
+    console.error("Error toggling saved status:", err);
+  }
+};
+
+const handleToggleFollow = async (authorName, postId) => {
   const currentUsername = localStorage.getItem("username"); // Fetch from localStorage
 
   if (!currentUsername) {
@@ -205,7 +229,7 @@ const handleLikeToggle = async (postId) => {
 
                   <div className="flex items-center gap-2">
                     <button
-                    onClick={() => handleToggleFollow(post.authorName, post.postId, posts, setPosts)}
+                    onClick={() => handleToggleFollow(post.authorName, post.postId)}
                       className={`text-xs transition-all duration-200 px-3 py-1 rounded-md border ${
                         post.isFollowing
                           ? isProfessional
@@ -335,17 +359,25 @@ post.numberOfComments
                     </button>
                   </div>
 
-                  <button
-                    onClick={() => handleSave(post.id)}
-                    className={`px-3 py-1 rounded-lg flex items-center transition-colors ${
-                      isProfessional
-                        ? "text-gray-600 hover:text-gray-700 hover:bg-gray-50"
-                        : "text-orange-600 hover:text-orange-700 hover:bg-orange-50"
-                    }`}
-                  >
-                    <Bookmark className="w-4 h-4 mr-1" />
-                    <span className="font-medium text-sm">Save</span>
-                  </button>
+                 <button
+  onClick={() => handleSaveToggle(post.postId, isProfessional ? "professional" : "social", posts, setPosts)}
+  className={`px-3 py-1 rounded-lg flex items-center transition-colors ${
+    post.isSaved
+      ? "text-orange-700 bg-orange-50"          // style when saved
+      : isProfessional
+          ? "text-gray-600 hover:text-gray-700 hover:bg-gray-50"
+          : "text-orange-600 hover:text-orange-700 hover:bg-orange-50"
+  }`}
+>
+  <Bookmark
+    className="w-4 h-4 mr-1"
+    fill={post.isSaved ? "currentColor" : "none"}
+  />
+  <span className="font-medium text-sm">
+    {post.isSaved ? "Saved" : "Save"}
+  </span>
+</button>
+
                 </div>
               </div>
             </div>

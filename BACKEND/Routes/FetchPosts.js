@@ -19,7 +19,12 @@ router.get('/fetchsocialposts', async (req, res) => {
     const currentUserId = decoded.userId; // Current user's ID from the token
 
     console.log("Decoded JWT:", decoded);
+ const currentUser = await User.findById(currentUserId).lean();
+    if (!currentUser) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
 
+    const savedPostIds = (currentUser.socialProfile?.savedPosts || []).map(id => id.toString());
     const posts = await SocialPost.find()
       .populate('createdBy', 'username') // Populate `createdBy` field to get the `username`
       .populate('comments.commentedBy', 'username') // Populate `commentedBy` field to get the `username` for comments
@@ -60,6 +65,8 @@ router.get('/fetchsocialposts', async (req, res) => {
 
         const isFollowing = followers.includes(currentUserId);
         const isLiked = post.likes.some((like) => like.toString() === currentUserId);
+        const isSaved = savedPostIds.includes(post._id.toString()); // ✅ New check
+
 
         return {
           postId: post._id,
@@ -75,6 +82,8 @@ router.get('/fetchsocialposts', async (req, res) => {
           comments: formattedComments,
           isFollowing,
           isLiked,
+           isSaved, // ✅ New field in response
+
         };
       })
     );

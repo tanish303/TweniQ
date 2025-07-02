@@ -9,6 +9,8 @@ const CreatePost = require('./Routes/CreatePost');
 const FetchPosts = require('./Routes/FetchPosts');
 const FF = require('./Routes/Follow-Following');
 const LikeUnlike = require('./Routes/LikeUnlike');
+const SavePost = require('./Routes/SavePost');
+
 
 
 const app = express();
@@ -22,6 +24,7 @@ app.use('/createpost', CreatePost);
 app.use('/fetchposts', FetchPosts);
 app.use('/ff', FF);
 app.use('/likeunlike', LikeUnlike);
+app.use('/savepost', SavePost);
 
 const port = 3000;
 app.listen(port, () => {
