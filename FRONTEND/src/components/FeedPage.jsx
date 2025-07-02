@@ -18,33 +18,11 @@ export default function FeedPage() {
 const APIURL = import.meta.env.VITE_API_BASE_URL
 
   const handleVote = (postId, type) => {
-    setPosts((prev) =>
-      prev.map((post) => {
-        if (post.id === postId) {
-          const newStats = { ...post.stats }
-          if (type === "upvote" && newStats.upvotes !== undefined) {
-            newStats.upvotes += 1
-          } else if (type === "downvote" && newStats.downvotes !== undefined) {
-            newStats.downvotes += 1
-          } else if (type === "like" && newStats.likes !== undefined) {
-            newStats.likes += 1
-          }
-          return { ...post, stats: newStats }
-        }
-        return post
-      }),
-    )
+   
   }
 
   const handleSave = (postId) => {
-    setPosts((prev) =>
-      prev.map((post) => {
-        if (post.id === postId) {
-          return { ...post, stats: { ...post.stats, saves: post.stats.saves + 1 } }
-        }
-        return post
-      }),
-    )
+    
   }
 
 const handleToggleFollow = async (authorName, postId, posts, setPosts) => {
@@ -72,6 +50,35 @@ const handleToggleFollow = async (authorName, postId, posts, setPosts) => {
   }
 };
 
+
+const handleLikeToggle = async (postId) => {
+  try {
+    const username = localStorage.getItem("username");
+    const response = await axios.post(`${APIURL}/likeunlike/toggle-like`, {
+      postId,
+      username,
+    });
+
+    if (response.status === 200) {
+      const { isLiked } = response.data;
+
+      // Update the UI state (assuming you have posts stored in state)
+      setPosts((prevPosts) =>
+        prevPosts.map((post) =>
+          post.postId === postId
+            ? {
+                ...post,
+                isLiked,
+                numberOfLikes: isLiked ? post.numberOfLikes + 1 : post.numberOfLikes - 1,
+              }
+            : post
+        )
+      );
+    }
+  } catch (error) {
+    console.error("Error toggling like:", error);
+  }
+};
 
 
    const fetchSocialPosts = async () => {
@@ -303,12 +310,15 @@ const handleToggleFollow = async (authorName, postId, posts, setPosts) => {
                       </>
                     ) : (
                       <button
-                        onClick={() => handleVote(post.id, "like")}
-                        className="text-pink-600 hover:text-pink-700 hover:bg-pink-50 px-3 py-1 rounded-lg flex items-center transition-colors"
-                      >
-                        <Heart className="w-4 h-4 mr-1" />
-                        <span className="font-medium text-sm">{post.numberOfLikes}</span>
-                      </button>
+  onClick={() => handleLikeToggle(post.postId)}
+  className={`${
+    post.isLiked ? "text-pink-600" : "text-gray-500"
+  } hover:text-pink-700 hover:bg-pink-50 px-3 py-1 rounded-lg flex items-center transition-colors`}
+>
+  <Heart className="w-4 h-4 mr-1" fill={post.isLiked ? "currentColor" : "none"} />
+  <span className="font-medium text-sm">{post.numberOfLikes}</span>
+</button>
+
                     )}
 
                     <button
