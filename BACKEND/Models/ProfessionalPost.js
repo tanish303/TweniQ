@@ -14,8 +14,8 @@ const professionalPostSchema = new mongoose.Schema(
         },
       ],
     },
-    upvotes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-    downvotes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+        likes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    
     comments: [
       {
         commentedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },

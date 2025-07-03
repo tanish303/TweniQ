@@ -48,7 +48,7 @@ const handleSaveToggle = async (postId) => {
   }
 };
 
-const handleToggleFollow = async (authorName, postId) => {
+const handleToggleFollow = async (authorUsername, postId) => {
   const currentUsername = localStorage.getItem("username"); // Fetch from localStorage
 
   if (!currentUsername) {
@@ -58,7 +58,7 @@ const handleToggleFollow = async (authorName, postId) => {
 
   try {
     const response = await axios.post(`${APIURL}/ff/toggle-follow`, {
-      targetUsername: authorName,
+      targetUsername: authorUsername,
       currentUsername: currentUsername,
     });
 
@@ -77,23 +77,30 @@ const handleToggleFollow = async (authorName, postId) => {
 const handleLikeToggle = async (postId) => {
   try {
     const username = localStorage.getItem("username");
+       const mode = profileMode;
+
+    if (!username || !postId || !mode) {
+      console.warn("Missing username, postId, or mode");
+      return;
+    }
     const response = await axios.post(`${APIURL}/likeunlike/toggle-like`, {
       postId,
       username,
-      
+      mode,
     });
 
     if (response.status === 200) {
       const { isLiked } = response.data;
 
-      // Update the UI state (assuming you have posts stored in state)
       setPosts((prevPosts) =>
         prevPosts.map((post) =>
           post.postId === postId
             ? {
                 ...post,
                 isLiked,
-                numberOfLikes: isLiked ? post.numberOfLikes + 1 : post.numberOfLikes - 1,
+                numberOfLikes: isLiked
+                  ? post.numberOfLikes + 1
+                  : post.numberOfLikes - 1,
               }
             : post
         )
@@ -103,6 +110,7 @@ const handleLikeToggle = async (postId) => {
     console.error("Error toggling like:", error);
   }
 };
+
 
 
    const fetchSocialPosts = async () => {
@@ -231,7 +239,7 @@ const fetchProfessionalPosts = async () => {
                       <div className="w-10 h-10 rounded-full overflow-hidden ring-2 ring-white shadow-md">
                         <img
                           src="https://img.icons8.com/?size=100&id=98957&format=png&color=000000"
-                          alt={post.authorName}
+                          alt={post.authorUsername}
                           className="w-full h-full object-cover"
                         />
                       </div>
@@ -264,11 +272,11 @@ const fetchProfessionalPosts = async () => {
 
                   <div className="flex items-center gap-2">
                     <button
-                    onClick={() => handleToggleFollow(post.authorName, post.postId)}
+                    onClick={() => handleToggleFollow(post.authorUsername, post.postId)}
                       className={`text-xs transition-all duration-200 px-3 py-1 rounded-md border ${
                         post.isFollowing
                           ? isProfessional
-                            ? "bg-slate-100 text-slate-700 border-slate-300"
+                            ? "bg-slate-300 text-slate-700 border-slate-500"
                             : "bg-purple-100 text-purple-700 border-purple-300"
                           : isProfessional
                             ? "border-slate-300 text-slate-600 hover:bg-slate-50"
@@ -362,24 +370,7 @@ const fetchProfessionalPosts = async () => {
                 {/* Action Buttons */}
                 <div className="flex items-center justify-between pt-4 border-t border-gray-100">
                   <div className="flex items-center gap-4">
-                    {isProfessional ? (
-                      <>
-                        <button
-                          onClick={() => handleVote(post.id, "upvote")}
-                          className="text-green-600 hover:text-green-700 hover:bg-green-50 px-3 py-1 rounded-lg flex items-center transition-colors"
-                        >
-                          <ThumbsUp className="w-4 h-4 mr-1" />
-                          <span className="font-medium text-sm">{post.numberOfUpvotes}</span>
-                        </button>
-                        <button
-                          onClick={() => handleVote(post.id, "downvote")}
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50 px-3 py-1 rounded-lg flex items-center transition-colors"
-                        >
-                          <ThumbsDown className="w-4 h-4 mr-1" />
-                          <span className="font-medium text-sm">{post.numberOfDownvotes}</span>
-                        </button>
-                      </>
-                    ) : (
+                  
                       <button
   onClick={() => handleLikeToggle(post.postId)}
   className={`${
@@ -390,7 +381,7 @@ const fetchProfessionalPosts = async () => {
   <span className="font-medium text-sm">{post.numberOfLikes}</span>
 </button>
 
-                    )}
+                    
 
                     <button
                       className={`px-3 py-1 rounded-lg flex items-center transition-colors ${

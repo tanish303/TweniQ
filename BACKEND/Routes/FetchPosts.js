@@ -70,7 +70,9 @@ router.get('/fetchsocialposts', async (req, res) => {
 
         return {
           postId: post._id,
-          authorName: post.createdBy.username,
+          authorUsername: post.createdBy.username,
+          authorName: author.socialProfile?.name || "",   // ✅ new field
+
           title: post.title,
           content: post.content,
           timestamp: post.createdAt,
@@ -97,67 +99,68 @@ router.get('/fetchsocialposts', async (req, res) => {
   }
 });
 
+
+
 router.get("/fetchprofessionalposts", async (req, res) => {
   try {
-    /* 1️⃣  Verify JWT ------------------------------------------------------- */
+    // 1️⃣ Verify JWT token
     const token = req.headers.authorization?.split(" ")[1];
     if (!token) {
       return res.status(401).json({ success: false, message: "Authorization token required" });
     }
 
-    const decoded       = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const currentUserId = decoded.userId;
 
-    /* 2️⃣  Fetch current user once (to check saved posts & following) ------ */
+    // 2️⃣ Get current user for saved post info
     const currentUser = await User.findById(currentUserId).lean();
     if (!currentUser) {
       return res.status(404).json({ success: false, message: "User not found" });
     }
 
-    const savedProfessionalIds =
-      (currentUser.professionalProfile?.savedPosts || []).map(id => id.toString());
+    const savedProfessionalIds = (currentUser.professionalProfile?.savedPosts || []).map(id =>
+      id.toString()
+    );
 
-    /* 3️⃣  Query ProfessionalPosts ---------------------------------------- */
+    // 3️⃣ Fetch professional posts
     const posts = await ProfessionalPost.find()
-      .populate("createdBy", "username")               // get author username
-      .populate("comments.commentedBy", "username")    // get commenters usernames
+      .populate("createdBy", "username")
+      .populate("comments.commentedBy", "username")
       .lean();
 
-    /* 4️⃣  Format each post ------------------------------------------------ */
+    // 4️⃣ Format each post
     const formatted = await Promise.all(
       posts.map(async (post) => {
-        /* 4a. Build comments */
+        // Format comments
         const formattedComments = post.comments.map(c => ({
           username: c.commentedBy?.username || "Unknown",
-          text:      c.comment,
+          text: c.comment,
         }));
 
-        /* 4b. Is current user following the author? */
+        // Is current user following the post's author?
         const author = await User.findById(post.createdBy._id).lean();
-        if (!author) return null;                                  // skip if author deleted
-        const isFollowing = (author.followers || [])
-          .some((f) => f.toString() === currentUserId);
+        if (!author) return null;
 
-        /* 4c. Upvote / downvote / save flags */
-        const isUpvoted   = post.upvotes.some(u => u.toString() === currentUserId);
-        const isDownvoted = post.downvotes.some(d => d.toString() === currentUserId);
-        const isSaved     = savedProfessionalIds.includes(post._id.toString());
+        const isFollowing = (author.followers || []).some(f => f.toString() === currentUserId);
 
-        /* 4d. Return shape */
+        // Check like/save status
+        const isLiked = (post.likes || []).some(id => id.toString() === currentUserId);
+        const isSaved = savedProfessionalIds.includes(post._id.toString());
+
         return {
-          postId:            post._id,
-          authorName:        post.createdBy.username,
-          title:             post.title,
-          content:           post.content,
-          Poll:              post.Poll || null,
-          timestamp:         post.createdAt,
-          numberOfUpvotes:   post.upvotes.length,
-          numberOfDownvotes: post.downvotes.length,
-          numberOfComments:  post.comments.length,
-          comments:          formattedComments,
+          postId: post._id,
+          authorUsername: post.createdBy.username,
+          authorName: author.professionalProfile?.name || "",   // ✅ new field
+
+          title: post.title,
+          content: post.content,
+          Poll: post.Poll || null,
+          timestamp: post.createdAt,
+          numberOfLikes: post.likes.length || 0,
+          numberOfComments: post.comments.length,
+          comments: formattedComments,
           isFollowing,
-          isUpvoted,
-          isDownvoted,
+          isLiked,
           isSaved,
         };
       })
@@ -170,6 +173,7 @@ router.get("/fetchprofessionalposts", async (req, res) => {
     res.status(500).json({ success: false, message: "Failed to fetch professional posts" });
   }
 });
+
 
 
 
