@@ -13,6 +13,7 @@ import FeedPage from "./components/FeedPage"
 import CreatePostPage from "./components/CreatePostPage"
 import ChatPage from "./components/ChatPage"
 import AccountPage from "./components/AccountPage"
+import CommentSection from "./components/CommentSection"
 import { AppProvider } from "./context/AppContext"
 
 function App() {
@@ -25,6 +26,8 @@ function App() {
           <Route path="/setupprofile" element={<Setupprofile />} />
           <Route path="/signin" element={<Signin />} />
           <Route path="/resetPassword" element={<ResetPassword />} />
+          <Route path="/commentsection" element={<CommentSection />} />
+
 
           <Route path="/pages" element={<Pages />}>
             <Route index element={<HomePage />} />

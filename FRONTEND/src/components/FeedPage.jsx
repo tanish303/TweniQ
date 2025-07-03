@@ -2,8 +2,12 @@
 
 import { useState } from "react"
 import { motion } from "framer-motion"
-import { ThumbsUp, ThumbsDown, MessageCircle, Bookmark, Heart, UserPlus, Check } from "lucide-react"
+import { ToastContainer, toast } from "react-toastify"
+
+import { ThumbsUp, ThumbsDown, MessageCircle, Bookmark, Heart, UserPlus, Check,User } from "lucide-react"
 import { useProfile ,useApp} from "../context/AppContext"
+import { useNavigate } from "react-router-dom";
+
 import { useEffect } from "react"
 import axios from 'axios';
 
@@ -13,6 +17,8 @@ export default function FeedPage() {
   const { profileMode } = useProfile()
   const [posts, setPosts] = useState([])
     const { globalusername } = useApp();
+    const navigate = useNavigate();
+
   
   const isProfessional = profileMode === "professional"
 const APIURL = import.meta.env.VITE_API_BASE_URL
@@ -112,8 +118,60 @@ const handleLikeToggle = async (postId) => {
 };
 
 
+const handleVote = async (selectedOption, postId) => {
+  const jwtToken = localStorage.getItem("jwtToken");
+  if (!jwtToken) return toast.error("You must be logged in");
 
-   const fetchSocialPosts = async () => {
+  try {
+    const response = await fetch(`${APIURL}/poll/vote`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${jwtToken}`,
+      },
+      body: JSON.stringify({ postId, selectedOption }),
+    });
+
+    const data = await response.json();
+
+    if (response.ok && data.success) {
+      toast.success("Vote submitted!");
+
+      // Update local UI immediately
+      setPosts((prev) =>
+        prev.map((p) => {
+          if (p.postId !== postId) return p;
+
+          return {
+            ...p,
+            Poll: {
+              ...p.Poll,
+              votes: data.votes, // updated votes from backend
+            },
+            isVoted: true,
+            userVotedOption: selectedOption, // ✅ highlight immediately
+          };
+        })
+      );
+    } else {
+      toast.error(data.message || "Vote failed");
+    }
+  } catch (err) {
+    console.error(err);
+    toast.error("Something went wrong");
+  }
+};
+
+
+
+const handleCommentSection = (postId) => {
+  console.log("me");
+  navigate("/commentsection", {
+    state: { postId },
+  });
+};
+
+const fetchSocialPosts = async () => {
     try {
       const jwtToken = localStorage.getItem("jwtToken");
 
@@ -236,18 +294,16 @@ const fetchProfessionalPosts = async () => {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="relative">
-                      <div className="w-10 h-10 rounded-full overflow-hidden ring-2 ring-white shadow-md">
-                        <img
-                          src="https://img.icons8.com/?size=100&id=98957&format=png&color=000000"
-                          alt={post.authorUsername}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <div
-                        className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-white ${
-                          isProfessional ? "bg-green-500" : "bg-pink-500"
-                        }`}
-                      />
+                     <div
+                          className={`w-10 h-10 rounded-full flex items-center justify-center shadow-md ${
+                            isProfessional
+                              ? "bg-gradient-to-r from-blue-500 to-indigo-600"
+                              : "bg-gradient-to-r from-pink-500 to-purple-600"
+                          }`}
+                        >
+                          <User className="w-5 h-5 text-white" />
+                        </div>
+                      
                     </div>
                     <div>
                       <div className="flex gap-2 font-extrabold"  ><h3 className="font-semibold text-gray-900">{post.authorName}</h3> {isProfessional ? (
@@ -329,42 +385,83 @@ const fetchProfessionalPosts = async () => {
 
                {/* Poll Display (Professional Mode) */}
 {post.Poll && isProfessional && (
-  <div className="space-y-3 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-100">
-    <div className="space-y-2">
+  <div className="space-y-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-100">
+    <div className="space-y-3">
       {post.Poll.options.map((option, idx) => {
         const voteEntry = post.Poll.votes.find(v => v.option === option);
         const voteCount = voteEntry?.count || 0;
-
-        // Calculate total votes
         const totalVotes = post.Poll.votes.reduce((acc, v) => acc + v.count, 0);
         const percentage = totalVotes ? (voteCount / totalVotes) * 100 : 0;
+        const isUserVote = post.userVotedOption === option;
 
         return (
-          <div key={idx} className="relative overflow-hidden">
-            <div className="flex justify-between items-center p-3 bg-white rounded-lg border border-blue-200 relative z-10">
+          <div
+            key={idx}
+            onClick={() => {
+              if (!post.isVoted) handleVote(option, post.postId);
+            }}
+            className={`relative overflow-hidden rounded-lg transition ${
+              post.isVoted
+                ? isUserVote
+                  ? "bg-blue-600 text-white border border-blue-800"
+                  : "opacity-60 cursor-not-allowed"
+                : "cursor-pointer hover:ring hover:ring-blue-300"
+            }`}
+          >
+            <div className={`flex justify-between items-center p-3 rounded-lg relative z-10
+              ${isUserVote ? "bg-blue-600 text-white" : "bg-white border border-blue-200"}
+            `}>
               <span className="font-medium text-sm">{option}</span>
-              <div className="text-right">
-                <span className="text-blue-700 font-semibold text-sm">
-                  {Math.round(percentage)}%
-                </span>
-                <p className="text-xs text-gray-500">{voteCount} votes</p>
-              </div>
+
+              {post.isVoted && (
+                <div className="text-right">
+                  <span className="font-semibold text-sm">
+                    {Math.round(percentage)}%
+                  </span>
+                  <p className="text-xs">{voteCount} votes</p>
+                </div>
+              )}
             </div>
-            <div
-              className="absolute left-0 top-0 h-full bg-gradient-to-r from-blue-200 to-indigo-200 rounded-lg opacity-30"
-              style={{ width: `${percentage}%` }}
-            />
+
+            {post.isVoted && (
+              <div
+                className={`absolute left-0 top-0 h-full ${
+                  isUserVote
+                    ? "bg-blue-400"
+                    : "bg-gradient-to-r from-blue-200 to-indigo-200"
+                } rounded-lg opacity-30`}
+                style={{ width: `${percentage}%` }}
+              />
+            )}
           </div>
         );
       })}
     </div>
-    <p className="text-xs text-blue-600 font-medium">
-      {
-        post.Poll.votes.reduce((acc, v) => acc + v.count, 0)
-      } total votes
-    </p>
+
+    {/* Total Votes */}
+    {post.isVoted && (
+      <p className="text-sm text-blue-600 font-medium pt-1">
+        {post.Poll.votes.reduce((acc, v) => acc + v.count, 0)} total votes
+      </p>
+    )}
+
+    {/* Footnote */}
+    {!post.isVoted ? (
+      <p className="text-sm text-red-600 font-bold italic pt-3">
+        * You can only vote once
+      </p>
+    ) : (
+      <p className="text-sm text-green-700 font-bold italic pt-3">
+        ✓ You have already voted
+      </p>
+    )}
   </div>
 )}
+
+
+
+
+
 
 
                 {/* Action Buttons */}
@@ -383,7 +480,7 @@ const fetchProfessionalPosts = async () => {
 
                     
 
-                    <button
+                    <button onClick={()=> handleCommentSection (post.postId)}
                       className={`px-3 py-1 rounded-lg flex items-center transition-colors ${
                         isProfessional
                           ? "text-blue-600 hover:text-blue-700 hover:bg-blue-50"
@@ -422,6 +519,7 @@ post.numberOfComments
           </motion.div>
         ))}
       </div>
+      <ToastContainer />
 
       
     </div>

@@ -10,6 +10,9 @@ const FetchPosts = require('./Routes/FetchPosts');
 const FF = require('./Routes/Follow-Following');
 const LikeUnlike = require('./Routes/LikeUnlike');
 const SavePost = require('./Routes/SavePost');
+const Comments = require('./Routes/Comments');
+const Poll = require('./Routes/Poll');
+
 
 
 
@@ -25,6 +28,8 @@ app.use('/fetchposts', FetchPosts);
 app.use('/ff', FF);
 app.use('/likeunlike', LikeUnlike);
 app.use('/savepost', SavePost);
+app.use('/comments', Comments);
+app.use('/poll', Poll);
 
 const port = 3000;
 app.listen(port, () => {

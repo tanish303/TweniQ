@@ -100,7 +100,6 @@ router.get('/fetchsocialposts', async (req, res) => {
 });
 
 
-
 router.get("/fetchprofessionalposts", async (req, res) => {
   try {
     // 1️⃣ Verify JWT token
@@ -142,26 +141,43 @@ router.get("/fetchprofessionalposts", async (req, res) => {
         if (!author) return null;
 
         const isFollowing = (author.followers || []).some(f => f.toString() === currentUserId);
-
-        // Check like/save status
         const isLiked = (post.likes || []).some(id => id.toString() === currentUserId);
         const isSaved = savedProfessionalIds.includes(post._id.toString());
+
+        // 🔎 NEW ► Has the user voted? Which option?
+        let isVoted = false;
+        let userVotedOption = null;
+
+        if (post.Poll && Array.isArray(post.Poll.votes)) {
+          for (const v of post.Poll.votes) {
+            if (Array.isArray(v.votedBy) && v.votedBy.some(u => u.toString() === currentUserId)) {
+              isVoted = true;
+              userVotedOption = v.option;
+              break;
+            }
+          }
+        }
 
         return {
           postId: post._id,
           authorUsername: post.createdBy.username,
-          authorName: author.professionalProfile?.name || "",   // ✅ new field
+          authorName: author.professionalProfile?.name || "",
 
           title: post.title,
           content: post.content,
           Poll: post.Poll || null,
           timestamp: post.createdAt,
+
           numberOfLikes: post.likes.length || 0,
           numberOfComments: post.comments.length,
           comments: formattedComments,
+
           isFollowing,
           isLiked,
           isSaved,
+
+          isVoted,               // ✅ boolean
+          userVotedOption,       // ✅ string or null
         };
       })
     );
@@ -173,6 +189,7 @@ router.get("/fetchprofessionalposts", async (req, res) => {
     res.status(500).json({ success: false, message: "Failed to fetch professional posts" });
   }
 });
+
 
 
 
