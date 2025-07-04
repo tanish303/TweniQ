@@ -12,6 +12,8 @@ const LikeUnlike = require('./Routes/LikeUnlike');
 const SavePost = require('./Routes/SavePost');
 const Comments = require('./Routes/Comments');
 const Poll = require('./Routes/Poll');
+const AccountInfo = require('./Routes/AccountInfo');
+
 
 
 
@@ -30,6 +32,7 @@ app.use('/likeunlike', LikeUnlike);
 app.use('/savepost', SavePost);
 app.use('/comments', Comments);
 app.use('/poll', Poll);
+app.use('/account', AccountInfo);
 
 const port = 3000;
 app.listen(port, () => {

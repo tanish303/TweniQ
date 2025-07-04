@@ -3,7 +3,6 @@
 import { useState } from "react"
 import { motion } from "framer-motion"
 import { useNavigate } from "react-router-dom"
-
 import {
   User,
   Bookmark,
@@ -17,115 +16,115 @@ import {
   Mail,
   Calendar,
   MapPin,
-  Award,
-  TrendingUp,
+  LogOut,
 } from "lucide-react"
 import { useProfile } from "../context/AppContext"
+import { useEffect } from "react"
+import axios from 'axios';
 
-const userStats = {
-  professional: {
-    name: "Dr. Sarah Johnson",
-    title: "Senior Data Scientist",
-    company: "TechCorp Inc.",
-    location: "San Francisco, CA",
-    email: "sarah.johnson@techcorp.com",
-    joinDate: "January 2022",
-    posts: 127,
-    followers: 2840,
-    following: 456,
-    saved: 89,
-    achievements: 12,
-  },
-  social: {
-    name: "Sarah ✨",
-    bio: "Coffee lover ☕ | Adventure seeker 🏔️ | Dog mom 🐕",
-    location: "San Francisco",
-    joinDate: "January 2022",
-    posts: 234,
-    followers: 1250,
-    following: 890,
-    liked: 1456,
-    saved: 156,
-    streaks: 45,
-  },
-}
 
 export default function AccountPage() {
+  const APIURL = import.meta.env.VITE_API_BASE_URL;
+  const [overview, setOverview] = useState(null);
+
   const { profileMode } = useProfile()
   const [activeSection, setActiveSection] = useState(null)
   const isProfessional = profileMode === "professional"
-  const navigate = useNavigate();
+  const navigate = useNavigate()
 
-  const stats = isProfessional ? userStats.professional : userStats.social
-const logout = () => {
-    localStorage.removeItem("jwtToken");
-    localStorage.removeItem("username");
-   
-    navigate("/"); // Optional redirect
-  };
 
-  const actionButtons = [
-    {
-      id: "saved",
-      icon: Bookmark,
-      label: "Saved Posts",
-      count: stats.saved,
-      color: isProfessional ? "blue" : "purple",
-      description: "Posts you've bookmarked",
-    },
-    {
-      id: "created",
-      icon: FileText,
-      label: "Created Posts",
-      count: stats.posts,
-      color: isProfessional ? "green" : "pink",
-      description: "Content you've shared",
-    },
-    ...(isProfessional
-      ? [
-          {
-            id: "achievements",
-            icon: Award,
-            label: "Achievements",
-            count: stats.achievements,
-            color: "yellow",
-            description: "Professional milestones",
+
+
+  useEffect(() => {
+    const fetchOverview = async () => {
+      try {
+        const token = localStorage.getItem("jwtToken");
+        const res = await axios.get(`${APIURL}/account/overview`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
           },
-        ]
-      : [
-          {
-            id: "liked",
-            icon: Heart,
-            label: "Liked Posts",
-            count: stats.liked,
-            color: "red",
-            description: "Posts you've liked",
-          },
-        ]),
-    {
-      id: "password",
-      icon: Lock,
-      label: "Change Password",
-      color: "gray",
-      description: "Update your security",
-    },
-    {
-      id: "followers",
-      icon: Users,
-      label: "Your Followers",
-      count: stats.followers,
-      color: isProfessional ? "indigo" : "orange",
-      description: "People following you",
-    },
-    {
-      id: "following",
-      icon: UserPlus,
-      label: "Your Following",
-      count: stats.following,
-      color: isProfessional ? "teal" : "cyan",
-      description: "People you follow",
-    },
-  ]
+        });
+        setOverview(res.data);
+      } catch (err) {
+        console.error("Failed to fetch overview", err);
+      } 
+    };
+
+    fetchOverview();
+  }, []);
+
+  
+
+  const logout = () => {
+    localStorage.removeItem("jwtToken")
+    localStorage.removeItem("username")
+    navigate("/")
+  }
+
+if (!overview) {
+  return <div className="text-center mt-10 text-gray-500">Loading account info...</div>;
+}
+
+const actionButtons = [
+  {
+    id: "posts",
+    icon: FileText,
+    label: "Your Posts",
+    count:
+      profileMode === "professional"
+        ? overview.professionalPostCount
+        : overview.socialPostCount,
+    color: profileMode === "professional" ? "blue" : "purple",
+    description: "Content you've shared",
+  },
+  {
+    id: "liked",
+    icon: Heart,
+    label: "Liked Posts",
+    count:
+      profileMode === "professional"
+        ? overview.professionalLikedCount
+        : overview.socialLikedCount,
+    color: profileMode === "professional" ? "red" : "pink",
+    description: "Posts you've liked",
+  },
+  {
+    id: "saved",
+    icon: Bookmark,
+    label: "Saved Posts",
+    count:
+      profileMode === "professional"
+        ? overview.professionalSavedCount
+        : overview.socialSavedCount,
+    color: profileMode === "professional" ? "green" : "cyan",
+    description: "Posts you've bookmarked",
+  },
+  {
+    id: "followers",
+    icon: Users,
+    label: "Followers",
+    count: overview.numberoffollowers,
+    color: profileMode === "professional" ? "indigo" : "orange",
+    description: "People following you",
+  },
+  {
+    id: "following",
+    icon: UserPlus,
+    label: "Following",
+    count: overview.numberoffollowing,
+    color: profileMode === "professional" ? "teal" : "yellow",
+    description: "People you follow",
+  },
+  {
+    id: "password",
+    icon: Lock,
+    label: "Change Password",
+    color: "gray",
+    description: "Update your security",
+  },
+];
+
+
 
   const getColorClasses = (color) => {
     const colors = {
@@ -149,13 +148,17 @@ const logout = () => {
     return colors[color] || colors.gray
   }
 
+ 
+
   return (
     <div className="max-w-5xl mx-auto space-y-6">
+      <button onClick={        console.log(overview)}></button>
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-8">
         <div
           className={`inline-flex items-center gap-2 px-3 py-1 rounded-full mb-3 ${
             isProfessional
+
               ? "bg-slate-100 text-slate-700"
               : "bg-gradient-to-r from-pink-100 to-purple-100 text-purple-700"
           }`}
@@ -163,7 +166,6 @@ const logout = () => {
           <div className={`w-1 h-1 rounded-full ${isProfessional ? "bg-slate-500" : "bg-purple-500"}`} />
           <span className="text-xs font-medium">Account Dashboard</span>
         </div>
-
         <h1
           className={`text-3xl font-bold mb-2 ${
             isProfessional
@@ -177,113 +179,108 @@ const logout = () => {
           Manage your {isProfessional ? "professional" : "social"} profile and preferences
         </p>
       </motion.div>
- <button onClick={logout} className="bg-amber-400">logout</button>
+
       <div className="grid lg:grid-cols-4 gap-6">
-        {/* Profile Card */}
+        {/* Profile Card - Left Side */}
         <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="lg:col-span-1">
           <div
             className={`border-0 shadow-lg rounded-lg ${
-              isProfessional ? "bg-white" : "bg-gradient-to-br from-white/90 to-purple-50/50 backdrop-blur-sm"
+              isProfessional
+                ? "bg-white/90 backdrop-blur-sm"
+                : "bg-gradient-to-br from-white/90 to-purple-50/50 backdrop-blur-sm"
             }`}
           >
             <div className="text-center p-6 pb-3">
-              <div className="relative mx-auto mb-4">
-                <div className="w-20 h-20 mx-auto rounded-full overflow-hidden ring-2 ring-white shadow-lg">
-                  <img src="/placeholder.svg?height=80&width=80" alt="Profile" className="w-full h-full object-cover" />
-                </div>
-                <button className="absolute -bottom-1 -right-1 rounded-full w-7 h-7 p-0 shadow-md border bg-white hover:bg-gray-50 flex items-center justify-center">
-                  <Edit3 className="w-3 h-3" />
-                </button>
-                <div
-                  className={`absolute -top-1 -left-1 w-4 h-4 rounded-full border-2 border-white ${
-                    isProfessional ? "bg-green-500" : "bg-pink-500"
-                  }`}
-                />
-              </div>
+              {/* Profile Picture */}
+             <div className="relative mx-auto mb-4">
+  <div className="w-20 h-20 mx-auto rounded-full overflow-hidden ring-2 ring-white shadow-lg bg-gray-100 flex items-center justify-center">
+    <User  className="w-full h-full text-gray-400 p-4" />
+  </div>
+</div>
 
-              <h2 className="text-lg font-semibold mb-1">{stats.name}</h2>
 
+              {/* Display Name */}
+<h2 className="text-lg font-semibold mb-1">
+  {isProfessional ? overview.professionalName : overview.socialName}
+</h2>
+
+       
+
+              {/* Bio - Unique per mode */}
+              <p className="text-gray-600 text-sm leading-relaxed mb-3">  {isProfessional ? overview.professionalBio : overview.socialBio}
+</p>
+
+              {/* Job Title or Hobbies - Unique per mode */}
               {isProfessional ? (
-                <div className="space-y-1">
-                  <p className="text-blue-600 font-medium text-sm">{stats.title}</p>
-                  <p className="text-gray-600 text-sm">{stats.company}</p>
-                </div>
+                <p className="text-blue-600 font-medium text-sm">{overview.occupation}</p>
               ) : (
-                <p className="text-gray-600 text-sm leading-relaxed">{stats.bio}</p>
+                <p className="text-purple-600 font-medium text-sm">{overview.hobbies}</p>
               )}
             </div>
 
             <div className="px-6 pb-6 space-y-4">
               <div className="h-px bg-gray-200" />
 
-              {/* Profile Info */}
-              <div className="space-y-2 text-xs">
-                <div className="flex items-center gap-2 text-gray-600">
-                  <MapPin className="w-3 h-3" />
-                  <span className="font-medium">{stats.location}</span>
-                </div>
+              {/* Profile Info - Common + Unique */}
+            <div className="space-y-2 text-xs">
+  <div className="flex items-center gap-2 text-gray-600">
+    <User className="w-3 h-3" />
+    <span className="font-medium">{overview.username}</span>
+  </div>
+  <div className="flex items-center gap-2 text-gray-600">
+    <Mail className="w-3 h-3" />
+    <span className="font-medium">{overview.email}</span>
+  </div>
+  <div className="flex items-center gap-2 text-gray-600">
+    <Calendar className="w-3 h-3" />
+<span className="font-medium">
+  Joined {new Date(overview.joinedAt).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  })}
+</span>  </div>
+</div>
 
-                {isProfessional && (
-                  <div className="flex items-center gap-2 text-gray-600">
-                    <Mail className="w-3 h-3" />
-                    <span className="font-medium">{stats.email}</span>
-                  </div>
-                )}
-
-                <div className="flex items-center gap-2 text-gray-600">
-                  <Calendar className="w-3 h-3" />
-                  <span className="font-medium">Joined {stats.joinDate}</span>
-                </div>
-
-                {!isProfessional && (
-                  <div className="flex items-center gap-2 text-gray-600">
-                    <TrendingUp className="w-3 h-3" />
-                    <span className="font-medium">{stats.streaks} day streak</span>
-                  </div>
-                )}
-              </div>
 
               <div className="h-px bg-gray-200" />
 
-              {/* Stats */}
+              {/* Stats - Common Fields */}
               <div className="grid grid-cols-2 gap-3 text-center">
+              
+
                 <div className="space-y-1">
-                  <div className="font-bold text-lg">{stats.posts}</div>
-                  <div className="text-xs text-gray-500 font-medium">Posts</div>
-                </div>
-                <div className="space-y-1">
-                  <div className="font-bold text-lg">{stats.followers}</div>
+                  <div className="font-bold text-lg">{overview.numberoffollowers}</div>
                   <div className="text-xs text-gray-500 font-medium">Followers</div>
                 </div>
                 <div className="space-y-1">
-                  <div className="font-bold text-lg">{stats.following}</div>
+                  <div className="font-bold text-lg">{overview.numberoffollowing}</div>
                   <div className="text-xs text-gray-500 font-medium">Following</div>
                 </div>
-                <div className="space-y-1">
-                  <div className="font-bold text-lg">{stats.saved}</div>
-                  <div className="text-xs text-gray-500 font-medium">Saved</div>
-                </div>
+                
               </div>
 
+              
+
+              {/* Logout Button - Common */}
               <button
-                className={`w-full h-9 font-medium rounded-lg transition-all duration-200 border flex items-center justify-center ${
-                  isProfessional
-                    ? "border-blue-200 text-blue-600 hover:bg-blue-50"
-                    : "border-purple-200 text-purple-600 hover:bg-purple-50"
-                }`}
+                onClick={logout}
+                className="w-full h-9 font-medium rounded-lg transition-all duration-200 border border-red-200 text-red-600 hover:bg-red-50 flex items-center justify-center"
               >
-                <Settings className="w-4 h-4 mr-2" />
-                Edit Profile
+                <LogOut className="w-4 h-4 mr-2" />
+                Logout
               </button>
             </div>
           </div>
         </motion.div>
 
-        {/* Action Buttons Grid */}
+        {/* Action Buttons Grid - Right Side */}
         <motion.div initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} className="lg:col-span-3">
           <div
             className={`border-0 shadow-lg rounded-lg ${
-              isProfessional ? "bg-white" : "bg-gradient-to-br from-white/90 to-purple-50/50 backdrop-blur-sm"
+              isProfessional
+                ? "bg-white/90 backdrop-blur-sm"
+                : "bg-gradient-to-br from-white/90 to-purple-50/50 backdrop-blur-sm"
             }`}
           >
             <div className="p-6 pb-4">
@@ -314,12 +311,13 @@ const logout = () => {
                     >
                       <button
                         onClick={() => setActiveSection(button.id)}
-                        className={`w-full h-auto p-4 flex flex-col items-center gap-3 transition-all duration-200 border rounded-lg shadow-sm hover:shadow-md ${getColorClasses(button.color)}`}
+                        className={`w-full h-auto p-4 flex flex-col items-center gap-3 transition-all duration-200 border rounded-lg shadow-sm hover:shadow-md backdrop-blur-sm ${getColorClasses(
+                          button.color,
+                        )}`}
                       >
                         <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-white/80 shadow-sm">
                           <Icon className="w-5 h-5" />
                         </div>
-
                         <div className="text-center space-y-1">
                           <div className="font-semibold text-sm">{button.label}</div>
                           <div className="text-xs opacity-75">{button.description}</div>
@@ -341,7 +339,7 @@ const logout = () => {
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: "auto" }}
                   exit={{ opacity: 0, height: 0 }}
-                  className="mt-6 p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border border-gray-200"
+                  className="mt-6 p-4 bg-gradient-to-r from-gray-50/80 to-gray-100/80 backdrop-blur-sm rounded-lg border border-gray-200"
                 >
                   <div className="text-center space-y-3">
                     <div className="text-lg font-semibold text-gray-800">
@@ -354,7 +352,7 @@ const logout = () => {
                     <div className="flex justify-center gap-3">
                       <button
                         onClick={() => setActiveSection(null)}
-                        className="px-4 py-1 rounded-lg text-sm border hover:bg-white transition-colors"
+                        className="px-4 py-1 rounded-lg text-sm border hover:bg-white/80 backdrop-blur-sm transition-colors"
                       >
                         Close Preview
                       </button>
