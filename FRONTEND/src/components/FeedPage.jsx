@@ -384,7 +384,7 @@ const fetchProfessionalPosts = async () => {
 )}
 
                {/* Poll Display (Professional Mode) */}
-{post.Poll && isProfessional && (
+{isProfessional && post.Poll && Array.isArray(post.Poll.options) && post.Poll.options.length > 0 && (
   <div className="space-y-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-100">
     <div className="space-y-3">
       {post.Poll.options.map((option, idx) => {

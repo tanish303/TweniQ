@@ -29,8 +29,7 @@ router.post('/checkfriendexists', async (req, res) => {
 });
 
 
-
-router.post('/createsocialpost', async (req, res) => {
+router.post("/createsocialpost", async (req, res) => {
   const { title, content, mood, taggedFriend, moodEmoji } = req.body;
 
   if (!title || !content) {
@@ -38,52 +37,55 @@ router.post('/createsocialpost', async (req, res) => {
   }
 
   try {
-    // Extract user information from token
-    const token = req.headers.authorization.split(" ")[1]; // Assuming token is sent as "Bearer <token>"
-    const decoded = jwt.verify(token, process.env.JWT_SECRET); // Use your JWT secret
-    const user = await User.findById(decoded.userId); // Fetch user from database
-        console.log(decoded);
-
+    /* 1️⃣  Verify JWT & fetch user */
+    const token   = req.headers.authorization?.split(" ")[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);   // payload must have { userId }
+    const user    = await User.findById(decoded.userId);
 
     if (!user) {
       return res.status(404).json({ success: false, message: "User not found" });
     }
 
-    // Validate taggedFriend if provided
+    /* 2️⃣  Validate taggedFriend (optional) */
     let taggedFriendId = null;
     if (taggedFriend) {
-      const taggedUser = await User.findOne({ username: taggedFriend }); // Assuming the friend is searched by username
+      const taggedUser = await User.findOne({ username: taggedFriend });
       if (!taggedUser) {
         return res.status(400).json({ success: false, message: "Tagged friend does not exist" });
       }
-      taggedFriendId = taggedUser._id; // Use the friend's ObjectId
+      taggedFriendId = taggedUser._id;
     }
 
-    // Create a new post
-    const newPost = new SocialPost({
+    /* 3️⃣  Create and save the post */
+    const newPost = await SocialPost.create({
       createdBy: user._id,
       title,
       content,
       mood,
-      moodEmoji, // Add the emoji to the post
-      taggedFriend: taggedFriendId, // Include taggedFriend ID if available
+      moodEmoji,
+      taggedFriend: taggedFriendId,
     });
 
-    await newPost.save();
+    /* 4️⃣  ⬅️  PUSH the post ID into user.socialProfile.posts */
+    await User.findByIdAndUpdate(
+      user._id,
+      { $push: { "socialProfile.posts": newPost._id } },
+      { new: true }                       // optional: returns updated doc (not used here)
+    );
 
-    // Send the post back as a response with the emoji included
-    res.status(201).json({ 
-      success: true, 
+    /* 5️⃣  Send response */
+    res.status(201).json({
+      success: true,
       post: {
-        id: newPost._id,
-        title: newPost.title,
-        content: newPost.content,
-        mood: newPost.mood,
-        moodEmoji: newPost.moodEmoji, // Send emoji to the frontend
+        id:           newPost._id,
+        title:        newPost.title,
+        content:      newPost.content,
+        mood:         newPost.mood,
+        moodEmoji:    newPost.moodEmoji,
         taggedFriend: taggedFriendId,
-        createdBy: user.username,
-        createdAt: newPost.createdAt,
-      } 
+        createdBy:    user.username,
+        createdAt:    newPost.createdAt,
+      },
     });
   } catch (error) {
     console.error("Error creating post:", error);
@@ -95,39 +97,65 @@ router.post('/createsocialpost', async (req, res) => {
 //  For Creating a new professional post
 
 
-router.post('/createprofessionalpost', async (req, res) => {
+router.post("/createprofessionalpost", async (req, res) => {
   const { title, content, Poll } = req.body;
 
   if (!title || !content) {
-    return res.status(400).json({ success: false, message: "All required fields must be provided" });
+    return res
+      .status(400)
+      .json({ success: false, message: "All required fields must be provided" });
   }
 
   try {
-    // Extract token from the Authorization header
-    const token = req.headers.authorization.split(" ")[1]; // "Bearer <token>"
-    const decoded = jwt.verify(token, process.env.JWT_SECRET); // Use your JWT secret
-    const user = await User.findById(decoded.userId); // Fetch the user from the database
+    /* 1️⃣  Verify JWT & fetch user */
+    const token   = req.headers.authorization?.split(" ")[1]; // "Bearer <token>"
+    const decoded = jwt.verify(token, process.env.JWT_SECRET); // payload must have { userId }
+    const user    = await User.findById(decoded.userId);
 
     if (!user) {
-      return res.status(404).json({ success: false, message: "User not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
     }
 
-    // Create a new professional post
-    const newPost = new ProfessionalPost({
-      createdBy: user._id, // Use the user's ObjectId
+    /* 2️⃣  Create and save the professional post */
+    const newPost = await ProfessionalPost.create({
+      createdBy: user._id,
       title,
       content,
       Poll,
     });
 
-    await newPost.save();
-    res.status(201).json({ success: true, post: newPost });
+    /* 3️⃣  ⬅️  PUSH the post ID into user.professionalProfile.posts */
+    await User.findByIdAndUpdate(
+      user._id,
+      { $push: { "professionalProfile.posts": newPost._id } },
+      { new: false }
+    );
+
+    /* 4️⃣  Send response */
+    res.status(201).json({
+      success: true,
+      post: {
+        id:        newPost._id,
+        title:     newPost.title,
+        content:   newPost.content,
+        poll:      newPost.Poll,
+        createdBy: user.username,
+        createdAt: newPost.createdAt,
+      },
+    });
   } catch (error) {
     console.error("Error creating professional post:", error);
-    res.status(500).json({ success: false, message: "Failed to create professional post" });
+    res
+      .status(500)
+      .json({ success: false, message: "Failed to create professional post" });
   }
 });
 
+
 module.exports = router;
+
+
 
 

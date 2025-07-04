@@ -15,6 +15,7 @@ import ChatPage from "./components/ChatPage"
 import AccountPage from "./components/AccountPage"
 import CommentSection from "./components/CommentSection"
 import { AppProvider } from "./context/AppContext"
+import ViewPersonalPosts from "./components/ViewPersonalPosts"
 
 function App() {
   return (
@@ -27,7 +28,8 @@ function App() {
           <Route path="/signin" element={<Signin />} />
           <Route path="/resetPassword" element={<ResetPassword />} />
           <Route path="/commentsection" element={<CommentSection />} />
-
+          <Route path="/account/:category" element={<ViewPersonalPosts />} />
+   
 
           <Route path="/pages" element={<Pages />}>
             <Route index element={<HomePage />} />

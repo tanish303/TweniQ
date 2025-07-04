@@ -118,6 +118,14 @@ const doesfriendexists = async () => {
     if (response.ok && data.success) {
       alert("Professional post created successfully!");
       console.log("Created Post:", data.post);
+      setTitle("");
+  setContent("");
+  setPollOptions([
+    { id: "1", text: "" },
+    { id: "2", text: "" },
+    { id: "3", text: "" },
+    { id: "4", text: "" },
+  ]);
     } else {
       alert(data.message || "Failed to create professional post");
     }
@@ -170,6 +178,18 @@ const handleSocialClick = async () => {
     if (response.ok && data.success) {
       alert("Social post created successfully!");
       console.log("Created Post:", data.post);
+      if (response.ok && data.success) {
+  alert("Social post created successfully!");
+  console.log("Created Post:", data.post);
+
+  // 🔄 Reset all input fields
+  setTitle("");
+  setContent("");
+  setSelectedMood(null);
+  settaggedfriend("");
+  setfriendexists(null);
+}
+
     } else {
       alert(data.message || "Failed to create social post");
     }

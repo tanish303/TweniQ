@@ -1,28 +1,29 @@
-"use client"
+import { createContext, useContext, useState, useEffect } from "react";
 
-import { createContext, useContext, useState } from "react"
-
-const AppContext = createContext()
+const AppContext = createContext();
 
 export const AppProvider = ({ children }) => {
-  // Auth state
-  const [globalusername, setglobalusername] = useState("")
+  // Load initial profileMode from localStorage or default to 'social'
+  const [profileMode, setProfileMode] = useState(() => {
+    return localStorage.getItem("profileMode") || "social";
+  });
 
-  // Profile state
-  const [profileMode, setProfileMode] = useState("social")
+  const [globalusername, setglobalusername] = useState("");
 
-  // Profile toggle method
+  // Sync profileMode to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem("profileMode", profileMode);
+  }, [profileMode]);
+
   const toggleProfile = () => {
-    setProfileMode((prev) => (prev === "social" ? "professional" : "social"))
-  }
+    setProfileMode((prev) => (prev === "social" ? "professional" : "social"));
+  };
 
   return (
     <AppContext.Provider
       value={{
-        // Auth state
         globalusername,
         setglobalusername,
-        // Profile state
         profileMode,
         setProfileMode,
         toggleProfile,
@@ -30,20 +31,18 @@ export const AppProvider = ({ children }) => {
     >
       {children}
     </AppContext.Provider>
-  )
-}
+  );
+};
 
-// General-purpose hook
 export const useApp = () => {
-  const context = useContext(AppContext)
+  const context = useContext(AppContext);
   if (context === undefined) {
-    throw new Error("useApp must be used within an AppProvider")
+    throw new Error("useApp must be used within an AppProvider");
   }
-  return context
-}
+  return context;
+};
 
-// Profile-specific hook for backward compatibility
 export const useProfile = () => {
-  const { profileMode, setProfileMode, toggleProfile } = useApp()
-  return { profileMode, setProfileMode, toggleProfile }
-}
+  const { profileMode, setProfileMode, toggleProfile } = useApp();
+  return { profileMode, setProfileMode, toggleProfile };
+};

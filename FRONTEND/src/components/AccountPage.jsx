@@ -28,7 +28,6 @@ export default function AccountPage() {
   const [overview, setOverview] = useState(null);
 
   const { profileMode } = useProfile()
-  const [activeSection, setActiveSection] = useState(null)
   const isProfessional = profileMode === "professional"
   const navigate = useNavigate()
 
@@ -68,39 +67,40 @@ if (!overview) {
 const actionButtons = [
   {
     id: "posts",
+    path: "/account/posts",                // ← new
     icon: FileText,
     label: "Your Posts",
-    count:
-      profileMode === "professional"
-        ? overview.professionalPostCount
-        : overview.socialPostCount,
+    count: profileMode === "professional"
+      ? overview.professionalPostCount
+      : overview.socialPostCount,
     color: profileMode === "professional" ? "blue" : "purple",
     description: "Content you've shared",
   },
   {
     id: "liked",
+    path: "/account/liked",
     icon: Heart,
     label: "Liked Posts",
-    count:
-      profileMode === "professional"
-        ? overview.professionalLikedCount
-        : overview.socialLikedCount,
+    count: profileMode === "professional"
+      ? overview.professionalLikedCount
+      : overview.socialLikedCount,
     color: profileMode === "professional" ? "red" : "pink",
     description: "Posts you've liked",
   },
   {
     id: "saved",
+    path: "/account/saved",
     icon: Bookmark,
     label: "Saved Posts",
-    count:
-      profileMode === "professional"
-        ? overview.professionalSavedCount
-        : overview.socialSavedCount,
+    count: profileMode === "professional"
+      ? overview.professionalSavedCount
+      : overview.socialSavedCount,
     color: profileMode === "professional" ? "green" : "cyan",
     description: "Posts you've bookmarked",
   },
   {
     id: "followers",
+    path: "/account/followers",
     icon: Users,
     label: "Followers",
     count: overview.numberoffollowers,
@@ -109,6 +109,7 @@ const actionButtons = [
   },
   {
     id: "following",
+    path: "/account/following",
     icon: UserPlus,
     label: "Following",
     count: overview.numberoffollowing,
@@ -117,12 +118,14 @@ const actionButtons = [
   },
   {
     id: "password",
+    path: "/resetpassword",
     icon: Lock,
     label: "Change Password",
     color: "gray",
     description: "Update your security",
   },
 ];
+
 
 
 
@@ -298,76 +301,39 @@ const actionButtons = [
               </div>
             </div>
 
-            <div className="px-6 pb-6">
-              <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
-                {actionButtons.map((button, index) => {
-                  const Icon = button.icon
-                  return (
-                    <motion.div
-                      key={button.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                    >
-                      <button
-                        onClick={() => setActiveSection(button.id)}
-                        className={`w-full h-auto p-4 flex flex-col items-center gap-3 transition-all duration-200 border rounded-lg shadow-sm hover:shadow-md backdrop-blur-sm ${getColorClasses(
-                          button.color,
-                        )}`}
-                      >
-                        <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-white/80 shadow-sm">
-                          <Icon className="w-5 h-5" />
-                        </div>
-                        <div className="text-center space-y-1">
-                          <div className="font-semibold text-sm">{button.label}</div>
-                          <div className="text-xs opacity-75">{button.description}</div>
-                          {button.count !== undefined && (
-                            <span className="inline-flex items-center px-2 py-0 rounded-full text-xs font-medium bg-white/60">
-                              {button.count}
-                            </span>
-                          )}
-                        </div>
-                      </button>
-                    </motion.div>
-                  )
-                })}
-              </div>
-
-              {/* Active Section Preview */}
-              {activeSection && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="mt-6 p-4 bg-gradient-to-r from-gray-50/80 to-gray-100/80 backdrop-blur-sm rounded-lg border border-gray-200"
-                >
-                  <div className="text-center space-y-3">
-                    <div className="text-lg font-semibold text-gray-800">
-                      {actionButtons.find((b) => b.id === activeSection)?.label}
-                    </div>
-                    <p className="text-gray-600">
-                      This feature will show your {activeSection.replace("_", " ")} content. Full functionality coming
-                      soon!
-                    </p>
-                    <div className="flex justify-center gap-3">
-                      <button
-                        onClick={() => setActiveSection(null)}
-                        className="px-4 py-1 rounded-lg text-sm border hover:bg-white/80 backdrop-blur-sm transition-colors"
-                      >
-                        Close Preview
-                      </button>
-                      <button
-                        className={`px-4 py-1 rounded-lg text-sm text-white ${
-                          isProfessional ? "bg-blue-600 hover:bg-blue-700" : "bg-purple-600 hover:bg-purple-700"
-                        }`}
-                      >
-                        View All
-                      </button>
-                    </div>
-                  </div>
-                </motion.div>
-              )}
+           <div className="px-6 pb-6">
+  <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
+    {actionButtons.map((button, index) => {
+      const Icon = button.icon;
+      return (
+        <motion.div
+          key={button.id}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: index * 0.05 }}
+        >
+          <button
+            onClick={() => navigate(button.path)}  
+            className={`w-full h-auto p-4 flex flex-col items-center gap-3 transition-all duration-200 border rounded-lg shadow-sm hover:shadow-md backdrop-blur-sm ${getColorClasses(button.color)}`}
+          >
+            <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-white/80 shadow-sm">
+              <Icon className="w-5 h-5" />
             </div>
+
+            <div className="text-center space-y-1">
+              <div className="font-semibold text-sm">{button.label}</div>
+              <div className="text-xs opacity-75">{button.description}</div>
+              <span className="inline-flex items-center px-2 py-0 rounded-full text-xs font-medium bg-white/60">
+                {button.count}
+              </span>
+            </div>
+          </button>
+        </motion.div>
+      );
+    })}
+  </div>
+</div>
+
           </div>
         </motion.div>
       </div>
