@@ -24,7 +24,7 @@ const userSchema = new mongoose.Schema(
 
       posts:        [{ type: mongoose.Schema.Types.ObjectId, ref: "SocialPost" }],
       savedPosts:   [{ type: mongoose.Schema.Types.ObjectId, ref: "SocialPost" }],
-      likedPosts:   [{ type: mongoose.Schema.Types.ObjectId, ref: "SocialPost" }], // 🔹 social likes
+      likedPosts:   [{ type: mongoose.Schema.Types.ObjectId, ref: "SocialPost" }],
     },
 
     /* ──────── Professional Profile ──── */
@@ -35,10 +35,12 @@ const userSchema = new mongoose.Schema(
 
       posts:        [{ type: mongoose.Schema.Types.ObjectId, ref: "ProfessionalPost" }],
       savedPosts:   [{ type: mongoose.Schema.Types.ObjectId, ref: "ProfessionalPost" }],
-      likedPosts:   [{ type: mongoose.Schema.Types.ObjectId, ref: "ProfessionalPost" }], // 🔹 professional likes
+      likedPosts:   [{ type: mongoose.Schema.Types.ObjectId, ref: "ProfessionalPost" }],
     },
   },
   { timestamps: true }
 );
 
-module.exports = mongoose.model("User", userSchema);
+// ✅ Protect against OverwriteModelError on dev hot reload
+module.exports =
+  mongoose.models.User || mongoose.model("User", userSchema);

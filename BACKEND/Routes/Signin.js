@@ -22,7 +22,7 @@ router.post("/", async (req, res) => {
     }
 
     // Check if user exists
-    const user = await User.findOne({ email });
+const user = await User.findOne({ email: new RegExp(`^${email}$`, "i") });
     if (!user) {
       return res.status(404).json({ message: "User with this email does not exist" });
     }
