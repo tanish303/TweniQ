@@ -72,6 +72,8 @@ router.get('/fetchsocialposts', async (req, res) => {
           postId: post._id,
           authorUsername: post.createdBy.username,
           authorName: author.socialProfile?.name || "",   // ✅ new field
+          authorDpUrl: author.socialProfile?.dpUrl || null,   // 🆕
+
 
           title: post.title,
           content: post.content,
@@ -162,6 +164,8 @@ router.get("/fetchprofessionalposts", async (req, res) => {
           postId: post._id,
           authorUsername: post.createdBy.username,
           authorName: author.professionalProfile?.name || "",
+          authorDpUrl: author.professionalProfile?.dpUrl || null,   // 🆕
+
 
           title: post.title,
           content: post.content,

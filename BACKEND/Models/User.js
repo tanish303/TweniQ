@@ -22,6 +22,7 @@ const userSchema = new mongoose.Schema(
       bio:        { type: String, default: "" },
       hobbies:    [String],
 
+      dpUrl:        { type: String, default: "" },  // 🆕 social DP
       posts:        [{ type: mongoose.Schema.Types.ObjectId, ref: "SocialPost" }],
       savedPosts:   [{ type: mongoose.Schema.Types.ObjectId, ref: "SocialPost" }],
       likedPosts:   [{ type: mongoose.Schema.Types.ObjectId, ref: "SocialPost" }],
@@ -33,6 +34,7 @@ const userSchema = new mongoose.Schema(
       bio:        { type: String, default: "" },
       occupation: { type: String, default: "" },
 
+      dpUrl:        { type: String, default: "" },  // 🆕 professional DP
       posts:        [{ type: mongoose.Schema.Types.ObjectId, ref: "ProfessionalPost" }],
       savedPosts:   [{ type: mongoose.Schema.Types.ObjectId, ref: "ProfessionalPost" }],
       likedPosts:   [{ type: mongoose.Schema.Types.ObjectId, ref: "ProfessionalPost" }],
@@ -41,6 +43,6 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// ✅ Protect against OverwriteModelError on dev hot reload
+// ✅ Prevent OverwriteModelError during hot reload in dev
 module.exports =
   mongoose.models.User || mongoose.model("User", userSchema);

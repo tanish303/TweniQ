@@ -108,7 +108,7 @@ export default function ChatWindow() {
       className={`min-h-screen transition-all duration-500 ${
         isProfessional
           ? "bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50"
-          : "bg-gradient-to-br from-purple-100 via-pink-50 via-orange-50 to-yellow-50"
+          : "bg-gradient-to-br from-purple-100 via-pink-50 to-yellow-50"
       }`}
     >
       <div className="max-w-4xl mx-auto h-screen flex flex-col">

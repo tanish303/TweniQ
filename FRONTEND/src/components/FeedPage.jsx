@@ -294,15 +294,29 @@ const fetchProfessionalPosts = async () => {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="relative">
-                     <div
-                          className={`w-10 h-10 rounded-full flex items-center justify-center shadow-md ${
-                            isProfessional
-                              ? "bg-gradient-to-r from-blue-500 to-indigo-600"
-                              : "bg-gradient-to-r from-pink-500 to-purple-600"
-                          }`}
-                        >
-                          <User className="w-5 h-5 text-white" />
-                        </div>
+                     <div className="w-10 h-10 rounded-full overflow-hidden shadow-md">
+ {post.authorDpUrl ? (
+  <>
+    {console.log(`Profile Image URL for ${post.authorUsername}: http://localhost:4000${post.authorDpUrl}`)}
+    <img
+src={`${APIURL}${post.authorDpUrl}`} // ✅ Uses .env backend URL
+      alt={post.authorUsername}
+      className="w-full h-full object-cover object-center"
+    />
+  </>
+) : (
+    <div
+      className={`w-full h-full flex items-center justify-center ${
+        isProfessional
+          ? "bg-gradient-to-r from-blue-500 to-indigo-600"
+          : "bg-gradient-to-r from-pink-500 to-purple-600"
+      }`}
+    >
+      <User className="w-5 h-5 text-white" />
+    </div>
+  )}
+</div>
+
                       
                     </div>
                     <div>

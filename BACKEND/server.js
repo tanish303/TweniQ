@@ -1,10 +1,9 @@
 require("dotenv").config();
 const express  = require("express");
 const cors     = require("cors");
-const http     = require("http");              // ⬅️ NEW
-const mongoose = require("./Models/db");       // MongoDB connection
+const http     = require("http");
+const mongoose = require("./Models/db");
 
-/* ---------- Route imports ---------- */
 const Signup        = require("./Routes/Signup");
 const Signin        = require("./Routes/Signin");
 const Resetpassword = require("./Routes/Resetpassword");
@@ -16,13 +15,15 @@ const SavePost      = require("./Routes/SavePost");
 const Comments      = require("./Routes/Comments");
 const Poll          = require("./Routes/Poll");
 const AccountInfo   = require("./Routes/AccountInfo");
-const Chat    = require("./Routes/Chat");
+const Chat          = require("./Routes/Chat");
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-/* ---------- REST endpoints ---------- */
+// ✅ Serve uploaded images publicly
+app.use("/uploads", express.static("uploads"));
+
 app.use("/signup",       Signup);
 app.use("/signin",       Signin);
 app.use("/resetpassword",Resetpassword);
@@ -38,7 +39,7 @@ app.use("/chat",         Chat);
 
 /* ---------- Create HTTP server & attach Socket.IO ---------- */
 const server = http.createServer(app);
-require("./socket")(server);   // ⬅️ wires up socket.io
+require("./socket")(server);
 
 const PORT = 3000;
 server.listen(PORT, () =>

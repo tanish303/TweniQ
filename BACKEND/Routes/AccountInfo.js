@@ -21,12 +21,12 @@ function verifyToken(req) {
 }
 
 /* ---------- GET /account/overview ---------- */
+/* routes/Account.js (or wherever the route lives) */
 router.get("/overview", async (req, res) => {
   try {
-    /* 1️⃣  Verify token → get user id */
-    const { userId: userId } = verifyToken(req);
+    const { userId } = verifyToken(req);
 
-    /* 2️⃣  Fetch needed fields only */
+    /* grab everything inside both sub‑profiles so dpUrl comes along */
     const user = await User.findById(userId)
       .select(
         "username email createdAt followersCount followingCount " +
@@ -36,48 +36,45 @@ router.get("/overview", async (req, res) => {
 
     if (!user) throw { status: 404, msg: "User not found" };
 
-    /* 3️⃣  Build overview object */
     const social = user.socialProfile       || {};
     const prof   = user.professionalProfile || {};
 
+    /* 👇 add the dp URLs */
     const overview = {
-      /* ── Identity ── */
       username:  user.username,
       email:     user.email,
       joinedAt:  user.createdAt,
 
-      /* ── Social profile ── */
-      socialName:        social.name        || "",
-      socialBio:         social.bio         || "",
-      hobbies:           social.hobbies     || [],
+      /* social */
+      socialName:  social.name  || "",
+      socialBio:   social.bio   || "",
+      hobbies:     social.hobbies || [],
+      socialDpUrl: social.dpUrl || null,          // <-- NEW
 
-      /* ── Professional profile ── */
-      professionalName:  prof.name          || "",
-      professionalBio:   prof.bio           || "",
-      occupation:        prof.occupation    || "",
+      /* professional */
+      professionalName: prof.name || "",
+      professionalBio:  prof.bio  || "",
+      occupation:       prof.occupation || "",
+      professionalDpUrl: prof.dpUrl || null,     // <-- NEW
 
-      /* ── Counts (separated) ── */
-      numberoffollowers:               user.followersCount,
-      numberoffollowing:               user.followingCount,
-
-      socialPostCount:         social.posts?.length        || 0,
-      professionalPostCount:   prof.posts?.length          || 0,
-
-      socialSavedCount:        social.savedPosts?.length   || 0,
-      professionalSavedCount:  prof.savedPosts?.length     || 0,
-
-      socialLikedCount:        social.likedPosts?.length   || 0,
-      professionalLikedCount:  prof.likedPosts?.length     || 0,
+      /* counts … (unchanged) */
+      numberoffollowers:         user.followersCount,
+      numberoffollowing:         user.followingCount,
+      socialPostCount:           social.posts?.length        || 0,
+      professionalPostCount:     prof.posts?.length          || 0,
+      socialSavedCount:          social.savedPosts?.length   || 0,
+      professionalSavedCount:    prof.savedPosts?.length     || 0,
+      socialLikedCount:          social.likedPosts?.length   || 0,
+      professionalLikedCount:    prof.likedPosts?.length     || 0,
     };
 
-    /* 4️⃣  Return JSON */
     res.json(overview);
-
   } catch (err) {
     console.error(err);
     res.status(err.status || 500).json({ error: err.msg || "Server error" });
   }
 });
+
 
 router.get("/followers", async (req, res) => {
   try {

@@ -1,13 +1,10 @@
 "use client"
-
 import { useState } from "react"
 import { useLocation } from "react-router-dom"
 import axios from "axios"
-import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
-import { useApp } from "../context/AppContext"; 
-
-
+import { useNavigate } from "react-router-dom"
+import { useEffect } from "react"
+import { useApp } from "../context/AppContext"
 import { User, Lock, Briefcase, Heart, FileText, CheckCircle, XCircle, Eye, EyeOff, Sparkles } from "lucide-react"
 
 const APIURL = import.meta.env.VITE_API_BASE_URL
@@ -37,8 +34,8 @@ const InputField = ({
         onChange={onChange}
         placeholder={placeholder}
         required={required}
-        className={`w-full px-4 py-3 pl-12 text-gray-900 bg-white border border-gray-300 rounded-xl 
-                   focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200
+        className={`w-full px-4 py-3 pl-12 text-gray-900 bg-white border border-gray-300 rounded-xl
+                    focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200
                    placeholder-gray-400 shadow-sm hover:shadow-md ${className}`}
       />
       <Icon className="absolute left-4 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-indigo-600 transition-colors" />
@@ -60,8 +57,8 @@ const TextAreaField = ({ icon: Icon, label, name, value, onChange, placeholder, 
         placeholder={placeholder}
         required={required}
         rows={rows}
-        className="w-full px-4 py-3 pl-12 text-gray-900 bg-white border border-gray-300 rounded-xl 
-                   focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200
+        className="w-full px-4 py-3 pl-12 text-gray-900 bg-white border border-gray-300 rounded-xl
+                    focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200
                    placeholder-gray-400 shadow-sm hover:shadow-md resize-none"
       />
       <Icon className="absolute left-4 top-4 w-4 h-4 text-gray-400 group-focus-within:text-indigo-600 transition-colors" />
@@ -81,8 +78,8 @@ const SelectField = ({ icon: Icon, label, name, value, onChange, options, requir
         value={value}
         onChange={onChange}
         required={required}
-        className="w-full px-4 py-3 pl-12 text-gray-900 bg-white border border-gray-300 rounded-xl 
-                   focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200
+        className="w-full px-4 py-3 pl-12 text-gray-900 bg-white border border-gray-300 rounded-xl
+                    focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200
                    shadow-sm hover:shadow-md appearance-none cursor-pointer"
       >
         {options.map((option) => (
@@ -101,12 +98,59 @@ const SelectField = ({ icon: Icon, label, name, value, onChange, options, requir
   </div>
 )
 
+const FileUploadField = ({ icon: Icon, label, onChange, accept = "image/*", value, sectionColor = "indigo" }) => (
+  <div className="group relative">
+    <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
+      <Icon
+        className={`w-4 h-4 ${sectionColor === "blue" ? "text-blue-600" : sectionColor === "pink" ? "text-pink-600" : "text-indigo-600"}`}
+      />
+      {label}
+    </label>
+    <div className="relative">
+      <input
+        type="file"
+        accept={accept}
+        onChange={onChange}
+        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+      />
+      <div
+        className="w-full px-4 py-3 pl-12 pr-4 text-gray-900 bg-white border border-gray-300 rounded-xl
+                    focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-transparent 
+                    transition-all duration-200 shadow-sm hover:shadow-md cursor-pointer
+                    flex items-center justify-between group-hover:border-indigo-300"
+      >
+        <div className="flex items-center gap-3">
+          <Icon
+            className={`w-4 h-4 text-gray-400 group-focus-within:${sectionColor === "blue" ? "text-blue-600" : sectionColor === "pink" ? "text-pink-600" : "text-indigo-600"} transition-colors`}
+          />
+          <span className={`text-sm ${value ? "text-gray-900 font-medium" : "text-gray-400"}`}>
+            {value ? value.name : "Choose image file..."}
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
+          {value && <CheckCircle className="w-4 h-4 text-green-500" />}
+          <span
+            className={`px-3 py-1 text-white text-xs font-medium rounded-lg ${
+              sectionColor === "blue"
+                ? "bg-gradient-to-r from-blue-500 to-blue-600"
+                : sectionColor === "pink"
+                  ? "bg-gradient-to-r from-pink-500 to-pink-600"
+                  : "bg-gradient-to-r from-indigo-500 to-purple-500"
+            }`}
+          >
+            Browse
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+)
+
 const Setupprofile = () => {
   const location = useLocation()
-    const navigate = useNavigate();
-  
+  const navigate = useNavigate()
   const email = location.state?.email
-  const { globalusername, setglobalusername } = useApp();
+  const { globalusername, setglobalusername } = useApp()
 
   const [formData, setFormData] = useState({
     username: "",
@@ -126,24 +170,22 @@ const Setupprofile = () => {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [socialDpFile, setSocialDpFile] = useState(null)
+  const [professionalDpFile, setProfessionalDpFile] = useState(null)
 
   const checkusernameavailable = async (e) => {
     const usernameatinstant = e.target.value
     handleInputChange(e)
-
     if (!usernameatinstant) {
       setUsernameStatus(null)
       return
     }
-
     try {
       const response = await fetch(
         `${APIURL}/signup/usernameavailability?username=${encodeURIComponent(usernameatinstant)}`,
         { method: "GET" },
       )
-
       const data = await response.json()
-
       if (response.ok) {
         setUsernameStatus(data.available ? "available" : "taken")
       }
@@ -156,7 +198,6 @@ const Setupprofile = () => {
   const handleInputChange = (e) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
-
     if (name === "password" || name === "confirmPassword") {
       validatePasswords(name, value)
     }
@@ -165,7 +206,6 @@ const Setupprofile = () => {
   const validatePasswords = (updatedField, updatedValue) => {
     const passwordone = updatedField === "password" ? updatedValue : formData.password
     const passwordsecond = updatedField === "confirmPassword" ? updatedValue : formData.confirmPassword
-
     if (passwordone !== passwordsecond) {
       setPasswordError("Passwords do not match")
     } else if (passwordone.length < 3 || passwordsecond.length < 3) {
@@ -175,45 +215,52 @@ const Setupprofile = () => {
     }
   }
 
- 
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (usernameStatus !== "available") {
       alert("This username is not available")
       return
     }
-
     setIsSubmitting(true)
-
     try {
-      const userData = {
-        username: formData.username,
-        email,
-        password: formData.password,
-        socialProfile: {
+      const formDataToSend = new FormData()
+      formDataToSend.append("username", formData.username)
+      formDataToSend.append("email", email)
+      formDataToSend.append("password", formData.password)
+      formDataToSend.append(
+        "socialProfile",
+        JSON.stringify({
           name: formData.socialName,
           bio: formData.socialBio,
           hobbies: formData.hobbies,
-        },
-        professionalProfile: {
+        }),
+      )
+      formDataToSend.append(
+        "professionalProfile",
+        JSON.stringify({
           name: formData.professionalName,
           bio: formData.professionalBio,
           occupation: formData.occupation,
-        },
+        }),
+      )
+      if (socialDpFile) {
+        formDataToSend.append("socialDp", socialDpFile)
       }
-
-      const response = await axios.post(`${APIURL}/signup/saveprofiledata`, userData, {
-        headers: { "Content-Type": "application/json" },
+      if (professionalDpFile) {
+        formDataToSend.append("professionalDp", professionalDpFile)
+      }
+      const response = await axios.post(`${APIURL}/signup/saveprofiledata`, formDataToSend, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
       })
 
       if (response.status === 200) {
-              const { jwtToken, username } = response.data;
-
-         localStorage.setItem("jwtToken", jwtToken);
-      localStorage.setItem("username", username);
-
-      // Save to global context/state
-      setglobalusername(username);
+        const { jwtToken, username } = response.data
+        localStorage.setItem("jwtToken", jwtToken)
+        localStorage.setItem("username", username)
+        // Save to global context/state
+        setglobalusername(username)
         setShowSuccessToast(true)
       } else {
         alert("Failed to create user")
@@ -225,17 +272,18 @@ const Setupprofile = () => {
       setIsSubmitting(false)
     }
   }
-useEffect(() => {
-  if (showSuccessToast) {
-    document.body.style.overflow = "hidden";
-  } else {
-    document.body.style.overflow = ""; 
-  }
 
-  return () => {
-    document.body.style.overflow = ""; 
-  };
-}, [showSuccessToast]);
+  useEffect(() => {
+    if (showSuccessToast) {
+      document.body.style.overflow = "hidden"
+    } else {
+      document.body.style.overflow = ""
+    }
+    return () => {
+      document.body.style.overflow = ""
+    }
+  }, [showSuccessToast])
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-500 via-white to-purple-500 py-8 px-4">
       <div className="scale-80 transform -m-30">
@@ -281,8 +329,8 @@ useEffect(() => {
                       onChange={checkusernameavailable}
                       minLength={1}
                       placeholder="Choose a unique username"
-                      className="w-full px-4 py-3 pl-12 pr-12 text-gray-900 bg-white border border-gray-300 rounded-xl 
-                               focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200
+                      className="w-full px-4 py-3 pl-12 pr-12 text-gray-900 bg-white border border-gray-300 rounded-xl
+                                focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200
                                placeholder-gray-400 shadow-sm hover:shadow-md"
                       required
                     />
@@ -332,8 +380,8 @@ useEffect(() => {
                         value={formData.password}
                         onChange={handleInputChange}
                         placeholder="Create a secure password"
-                        className="w-full px-4 py-3 pl-12 pr-12 text-gray-900 bg-white border border-gray-300 rounded-xl 
-                                 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200
+                        className="w-full px-4 py-3 pl-12 pr-12 text-gray-900 bg-white border border-gray-300 rounded-xl
+                                  focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200
                                  placeholder-gray-400 shadow-sm hover:shadow-md"
                         required
                       />
@@ -347,7 +395,6 @@ useEffect(() => {
                       </button>
                     </div>
                   </div>
-
                   <div className="group relative">
                     <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
                       <Lock className="w-4 h-4 text-indigo-600" />
@@ -360,8 +407,8 @@ useEffect(() => {
                         value={formData.confirmPassword}
                         onChange={handleInputChange}
                         placeholder="Confirm your password"
-                        className="w-full px-4 py-3 pl-12 pr-12 text-gray-900 bg-white border border-gray-300 rounded-xl 
-                                 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200
+                        className="w-full px-4 py-3 pl-12 pr-12 text-gray-900 bg-white border border-gray-300 rounded-xl
+                                  focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200
                                  placeholder-gray-400 shadow-sm hover:shadow-md"
                         required
                       />
@@ -376,7 +423,6 @@ useEffect(() => {
                     </div>
                   </div>
                 </div>
-
                 {passwordError && (
                   <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex items-center gap-2">
                     <XCircle className="w-4 h-4 text-red-500" />
@@ -393,7 +439,6 @@ useEffect(() => {
                   </div>
                   <h3 className="text-xl font-semibold text-gray-900">Professional Profile</h3>
                 </div>
-
                 <div className="grid md:grid-cols-2 gap-6">
                   <InputField
                     icon={User}
@@ -404,7 +449,6 @@ useEffect(() => {
                     placeholder="Your professional display name"
                     required
                   />
-
                   <SelectField
                     icon={Briefcase}
                     label="Occupation"
@@ -425,7 +469,6 @@ useEffect(() => {
                     ]}
                   />
                 </div>
-
                 <TextAreaField
                   icon={FileText}
                   label="Professional Bio"
@@ -435,6 +478,14 @@ useEffect(() => {
                   placeholder="Tell us about your professional background and expertise..."
                   required
                   rows={4}
+                />
+                <FileUploadField
+                  icon={User}
+                  label="Upload Professional DP"
+                  onChange={(e) => setProfessionalDpFile(e.target.files[0])}
+                  accept="image/*"
+                  value={professionalDpFile}
+                  sectionColor="blue"
                 />
               </div>
 
@@ -446,7 +497,6 @@ useEffect(() => {
                   </div>
                   <h3 className="text-xl font-semibold text-gray-900">Social Profile</h3>
                 </div>
-
                 <div className="grid md:grid-cols-2 gap-6">
                   <InputField
                     icon={User}
@@ -457,7 +507,6 @@ useEffect(() => {
                     placeholder="Your friendly display name"
                     required
                   />
-
                   <SelectField
                     icon={Heart}
                     label="Hobbies & Interests"
@@ -478,7 +527,6 @@ useEffect(() => {
                     ]}
                   />
                 </div>
-
                 <TextAreaField
                   icon={FileText}
                   label="Social Bio"
@@ -489,6 +537,14 @@ useEffect(() => {
                   required
                   rows={4}
                 />
+                <FileUploadField
+                  icon={Heart}
+                  label="Upload Social DP"
+                  onChange={(e) => setSocialDpFile(e.target.files[0])}
+                  accept="image/*"
+                  value={socialDpFile}
+                  sectionColor="pink"
+                />
               </div>
 
               {/* Submit Button */}
@@ -496,10 +552,10 @@ useEffect(() => {
                 <button
                   type="submit"
                   disabled={isSubmitting || usernameStatus !== "available"}
-                  className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 
-                           disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed
-                           text-white font-semibold py-4 px-8 rounded-xl transition-all duration-200 
-                           shadow-lg hover:shadow-xl transform hover:-translate-y-0.5
+                  className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700
+                            disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed
+                           text-white font-semibold py-4 px-8 rounded-xl transition-all duration-200
+                            shadow-lg hover:shadow-xl transform hover:-translate-y-0.5
                            flex items-center justify-center gap-2"
                 >
                   {isSubmitting ? (
@@ -521,33 +577,32 @@ useEffect(() => {
 
         {/* Success Toast */}
         {showSuccessToast && (
-  <div className="fixed inset-0 z-50 flex items-end justify-center bg-gray bg-opacity-20 backdrop-blur-sm">
-    <div
-      className="bg-white p-8 rounded-3xl shadow-2xl max-w-md mx-4 text-center mb-12"
-      style={{ marginBottom: "250px" }}
-    >
-      <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-        <CheckCircle className="w-8 h-8 text-green-600" />
-      </div>
-      <h2 className="text-2xl font-bold text-gray-900 mb-2">Welcome to SocioFusion! 🎉</h2>
-      <p className="text-gray-600 mb-6">
-        Your profile has been created successfully. Get ready to connect and grow!
-      </p>
-      <button
-        onClick={() => {
-          setShowSuccessToast(false);
-          navigate("/pages");
-        }}
-        className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 
-                   text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 
-                   shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-      >
-        Continue to Home
-      </button>
-    </div>
-  </div>
-)}
-
+          <div className="fixed inset-0 z-50 flex items-end justify-center bg-gray bg-opacity-20 backdrop-blur-sm">
+            <div
+              className="bg-white p-8 rounded-3xl shadow-2xl max-w-md mx-4 text-center mb-12"
+              style={{ marginBottom: "250px" }}
+            >
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <CheckCircle className="w-8 h-8 text-green-600" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Welcome to SocioFusion! 🎉</h2>
+              <p className="text-gray-600 mb-6">
+                Your profile has been created successfully. Get ready to connect and grow!
+              </p>
+              <button
+                onClick={() => {
+                  setShowSuccessToast(false)
+                  navigate("/pages")
+                }}
+                className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700
+                          text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200
+                          shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+              >
+                Continue to Home
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

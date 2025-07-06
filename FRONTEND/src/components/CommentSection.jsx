@@ -75,7 +75,7 @@ const CommentSection = () => {
       className={`min-h-screen transition-all duration-500 ${
         isProfessional
           ? "bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50"
-          : "bg-gradient-to-br from-purple-100 via-pink-50 via-orange-50 to-yellow-50"
+          : "bg-gradient-to-br from-purple-100 via-pink-50  to-yellow-50"
       }`}
     >
       <div className="max-w-4xl mx-auto p-6">
@@ -149,17 +149,26 @@ const CommentSection = () => {
                   <div className="p-6">
                     <div className="flex items-start gap-4">
                       {/* Avatar */}
-                      <div className="flex-shrink-0">
-                        <div
-                          className={`w-10 h-10 rounded-full flex items-center justify-center shadow-md ${
-                            isProfessional
-                              ? "bg-gradient-to-r from-blue-500 to-indigo-600"
-                              : "bg-gradient-to-r from-pink-500 to-purple-600"
-                          }`}
-                        >
-                          <User className="w-5 h-5 text-white" />
-                        </div>
-                      </div>
+                    <div className="flex-shrink-0 w-10 h-10 rounded-full overflow-hidden shadow-md">
+  {comment.dpUrl ? (
+    <img
+      src={`${APIURL}${comment.dpUrl}`}           
+      alt={comment.displayName}
+      className="w-full h-full object-cover object-center"
+    />
+  ) : (
+    <div
+      className={`w-full h-full flex items-center justify-center ${
+        isProfessional
+          ? "bg-gradient-to-r from-blue-500 to-indigo-600"
+          : "bg-gradient-to-r from-pink-500 to-purple-600"
+      }`}
+    >
+      <User className="w-5 h-5 text-white" />     
+    </div>
+  )}
+</div>
+
 
                       {/* Comment Content */}
                       <div className="flex-1 min-w-0">

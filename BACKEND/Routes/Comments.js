@@ -5,7 +5,6 @@ const SocialPost = require('../Models/SocialPost');
 const ProfessionalPost = require('../Models/ProfessionalPost');
 const jwt = require("jsonwebtoken");
 
-
 router.get("/getcomments", async (req, res) => {
   const { postId, mode } = req.query;
 
@@ -17,25 +16,32 @@ router.get("/getcomments", async (req, res) => {
     const PostModel = mode === "professional" ? ProfessionalPost : SocialPost;
 
     const post = await PostModel.findById(postId)
-      .populate("comments.commentedBy")  // populate entire user object
+      .populate("comments.commentedBy") // populate entire user object
       .lean();
 
     if (!post) {
       return res.status(404).json({ success: false, message: "Post not found" });
     }
 
-    const formattedComments = post.comments.map(c => {
+    const formattedComments = post.comments.map((c) => {
       const user = c.commentedBy;
 
       let displayName = "Unknown";
+      let dpUrl = null;
+
       if (user) {
-        displayName = mode === "professional"
-          ? user.professionalProfile?.name || "Unknown"
-          : user.socialProfile?.name || "Unknown";
+        if (mode === "professional") {
+          displayName = user.professionalProfile?.name || "Unknown";
+          dpUrl = user.professionalProfile?.dpUrl || null;
+        } else {
+          displayName = user.socialProfile?.name || "Unknown";
+          dpUrl = user.socialProfile?.dpUrl || null;
+        }
       }
 
       return {
-        displayName: displayName,
+        displayName,
+        dpUrl,
         text: c.comment,
         createdAt: c.createdAt,
       };
@@ -47,6 +53,7 @@ router.get("/getcomments", async (req, res) => {
     return res.status(500).json({ success: false, message: "Server error" });
   }
 });
+
 
 
 

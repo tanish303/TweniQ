@@ -5,7 +5,23 @@ const crypto = require("crypto");
 const User = require("../Models/User");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const multer = require("multer");
+const path = require("path");
 
+
+// Setup multer storage
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "uploads/"); // Ensure this exists
+  },
+  filename: function (req, file, cb) {
+    const ext = path.extname(file.originalname);
+    const uniqueName = Date.now() + "-" + Math.round(Math.random() * 1e9) + ext;
+    cb(null, uniqueName);
+  },
+});
+
+const upload = multer({ storage });
 
 // For sending otp 
 
@@ -129,16 +145,20 @@ router.get("/usernameavailability", async (req, res) => {
   }
 });
 
-router.post('/saveprofiledata', async (req, res) => {
-  const {
-    email,
-    username,
-    password,
-    socialProfile,
-    professionalProfile,
-  } = req.body;
 
+router.post("/saveprofiledata", upload.fields([
+  { name: "socialDp", maxCount: 1 },
+  { name: "professionalDp", maxCount: 1 },
+]), async (req, res) => {
   try {
+    const {
+      email,
+      username,
+      password,
+      socialProfile,
+      professionalProfile,
+    } = req.body;
+
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -146,16 +166,34 @@ router.post('/saveprofiledata', async (req, res) => {
 
     user.username = username || user.username;
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
-    user.password = hashedPassword;
+    // Hash password if provided
+    if (password) {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      user.password = hashedPassword;
+    }
 
-    user.socialProfile = { ...user.socialProfile, ...socialProfile };
-    user.professionalProfile = { ...user.professionalProfile, ...professionalProfile };
+    // Parse JSON fields from FormData strings
+    const parsedSocial = JSON.parse(socialProfile);
+    const parsedProfessional = JSON.parse(professionalProfile);
+
+    user.socialProfile = {
+      ...user.socialProfile,
+      ...parsedSocial,
+      dpUrl: req.files?.socialDp?.[0]
+        ? `/uploads/${req.files.socialDp[0].filename}`
+        : user.socialProfile.dpUrl,
+    };
+
+    user.professionalProfile = {
+      ...user.professionalProfile,
+      ...parsedProfessional,
+      dpUrl: req.files?.professionalDp?.[0]
+        ? `/uploads/${req.files.professionalDp[0].filename}`
+        : user.professionalProfile.dpUrl,
+    };
 
     await user.save();
 
-    // ✅ Create JWT Token
     const token = jwt.sign(
       { userId: user._id },
       process.env.JWT_SECRET
