@@ -1,7 +1,6 @@
 "use client"
-
 import { motion } from "framer-motion"
-import { PlusCircle, MessageCircle, User, Sparkles, TrendingUp, Users, Zap } from "lucide-react"
+import { PlusCircle, MessageCircle, User, Sparkles, TrendingUp, Users, Zap, ArrowRight } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { useProfile } from "../context/AppContext"
 
@@ -58,27 +57,26 @@ export default function HomePage() {
   ]
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-6">
-      {/* Hero Section */}
+    <div className="min-h-screen flex flex-col items-center justify-center p-4">
+      {/* Hero Section - Smaller */}
       <motion.div
-        initial={{ opacity: 0, y: -30 }}
+        initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="text-center mb-12"
+        className="text-center mb-8"
       >
         <div
-          className={`inline-flex items-center gap-2 px-4 py-2 rounded-full mb-4 ${
+          className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-3 ${
             isProfessional
               ? "bg-gradient-to-r from-slate-100 to-blue-100 text-slate-700"
               : "bg-gradient-to-r from-pink-100 to-purple-100 text-purple-700"
           }`}
         >
-          <Zap className="w-4 h-4" />
-          <span className="font-medium text-sm">Welcome to {isProfessional ? "Professional" : "Social"} Mode</span>
+          <Zap className="w-3 h-3" />
+          <span className="font-medium text-xs">Welcome to {isProfessional ? "Professional" : "Social"} Mode</span>
         </div>
-
         <h1
-          className={`text-4xl font-bold mb-3 ${
+          className={`text-3xl font-bold mb-2 ${
             isProfessional
               ? "text-slate-800"
               : "bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent"
@@ -86,46 +84,54 @@ export default function HomePage() {
         >
           SocioFusion
         </h1>
-
-        <p className={`text-lg max-w-xl mx-auto ${isProfessional ? "text-slate-600" : "text-gray-600"}`}>
+        <p className={`text-base max-w-lg mx-auto ${isProfessional ? "text-slate-600" : "text-gray-600"}`}>
           {isProfessional
             ? "Connect and grow your professional network with industry leaders."
             : "Share your world and connect with friends in a vibrant community."}
         </p>
       </motion.div>
 
-      {/* Navigation Cards */}
-      <div className="grid md:grid-cols-2 gap-6 max-w-4xl w-full">
+      {/* Navigation Cards - Smaller */}
+      <div className="grid md:grid-cols-2 gap-4 max-w-3xl w-full">
         {navigationCards.map((card, index) => {
           const Icon = card.icon
           return (
             <motion.div
               key={card.id}
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1, duration: 0.4 }}
             >
               <div
-                className={`h-full cursor-pointer overflow-hidden border-0 shadow-lg bg-gradient-to-br ${card.bgGradient} hover:shadow-xl transition-all duration-300 rounded-lg`}
+                className={`h-full cursor-pointer overflow-hidden border-0 shadow-md bg-gradient-to-br ${card.bgGradient} hover:shadow-lg transition-all duration-300 rounded-lg transform hover:scale-105`}
                 onClick={() => onNavigate(card.id)}
               >
-                <div className="p-6 h-full flex flex-col">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className={`p-3 rounded-xl bg-gradient-to-r ${card.gradient} shadow-md`}>
-                      <Icon className="w-6 h-6 text-white" />
+                <div className="p-5 h-full flex flex-col">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className={`p-2.5 rounded-lg bg-gradient-to-r ${card.gradient} shadow-sm`}>
+                      <Icon className="w-5 h-5 text-white" />
                     </div>
-                    <div className={`w-2 h-2 rounded-full bg-gradient-to-r ${card.gradient}`} />
+                    <div className={`w-1.5 h-1.5 rounded-full bg-gradient-to-r ${card.gradient}`} />
                   </div>
-
-                  <h3 className="text-xl font-bold mb-3 text-gray-800">{card.title}</h3>
-
-                  <p className="text-gray-600 mb-6 flex-grow leading-relaxed">{card.description}</p>
-
-                  <button
-                    className={`w-full py-3 font-semibold rounded-lg bg-gradient-to-r ${card.gradient} hover:shadow-md transition-all duration-200 text-white`}
+                  <h3 className="text-lg font-bold mb-2 text-gray-800">{card.title}</h3>
+                  <p className="text-gray-600 mb-4 flex-grow leading-relaxed text-sm">{card.description}</p>
+                  <motion.button
+                    className={`w-full py-2.5 font-semibold rounded-lg bg-gradient-to-r ${card.gradient} hover:shadow-md transition-all duration-200 text-white flex items-center justify-center gap-2 group`}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                   >
-                    Get Started
-                  </button>
+                    <span className="text-sm">Continue</span>
+                    <motion.div
+                      animate={{ x: [0, 4, 0] }}
+                      transition={{
+                        duration: 1.5,
+                        repeat: Number.POSITIVE_INFINITY,
+                        ease: "easeInOut",
+                      }}
+                    >
+                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" />
+                    </motion.div>
+                  </motion.button>
                 </div>
               </div>
             </motion.div>
@@ -133,34 +139,76 @@ export default function HomePage() {
         })}
       </div>
 
-      {/* Stats Section */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.6 }}
-        className="mt-16 text-center"
-      >
-        <div className="grid grid-cols-3 gap-6 max-w-sm mx-auto">
-          {[
-            { label: "Active Users", value: "10K+" },
-            { label: "Posts Shared", value: "50K+" },
-            { label: "Connections", value: "25K+" },
-          ].map((stat, index) => (
+      {/* Floating Elements for Better Look */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
+        {!isProfessional ? (
+          <>
             <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.8 + index * 0.1 }}
-              className="text-center"
-            >
-              <div className={`text-2xl font-bold mb-1 ${isProfessional ? "text-slate-700" : "text-purple-600"}`}>
-                {stat.value}
-              </div>
-              <div className="text-xs text-gray-500">{stat.label}</div>
-            </motion.div>
-          ))}
-        </div>
-      </motion.div>
+              className="absolute top-20 left-10 w-20 h-20 bg-pink-300/10 rounded-full blur-xl"
+              animate={{
+                scale: [1, 1.2, 1],
+                rotate: [0, 180, 360],
+              }}
+              transition={{
+                duration: 20,
+                repeat: Number.POSITIVE_INFINITY,
+                ease: "linear",
+              }}
+            />
+            <motion.div
+              className="absolute bottom-20 right-20 w-16 h-16 bg-purple-300/15 rounded-full blur-lg"
+              animate={{
+                scale: [1.2, 1, 1.2],
+                rotate: [360, 180, 0],
+              }}
+              transition={{
+                duration: 15,
+                repeat: Number.POSITIVE_INFINITY,
+                ease: "linear",
+              }}
+            />
+            <motion.div
+              className="absolute top-1/2 right-10 w-12 h-12 bg-indigo-300/10 rounded-full blur-md"
+              animate={{
+                y: [-20, 20, -20],
+                x: [-10, 10, -10],
+              }}
+              transition={{
+                duration: 8,
+                repeat: Number.POSITIVE_INFINITY,
+                ease: "easeInOut",
+              }}
+            />
+          </>
+        ) : (
+          <>
+            <motion.div
+              className="absolute top-32 right-16 w-18 h-18 bg-blue-200/8 rounded-full blur-lg"
+              animate={{
+                scale: [1, 1.1, 1],
+                x: [0, 15, 0],
+              }}
+              transition={{
+                duration: 12,
+                repeat: Number.POSITIVE_INFINITY,
+                ease: "easeInOut",
+              }}
+            />
+            <motion.div
+              className="absolute bottom-32 left-16 w-14 h-14 bg-slate-300/6 rounded-full blur-md"
+              animate={{
+                scale: [1.1, 1, 1.1],
+                rotate: [0, 90, 180],
+              }}
+              transition={{
+                duration: 18,
+                repeat: Number.POSITIVE_INFINITY,
+                ease: "linear",
+              }}
+            />
+          </>
+        )}
+      </div>
     </div>
   )
 }

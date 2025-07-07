@@ -3,12 +3,31 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { Info, X, ArrowRight, Shield, Zap, Award, CheckCircle } from "lucide-react"
+import { useEffect } from "react"
+import {jwtDecode} from "jwt-decode"
 
-const AppName = import.meta.env.VITE_APP_NAME || "SocialApp"
+const AppName = import.meta.env.VITE_APP_NAME || "TweniQ"
 
 const Landingpage = () => {
   const navigate = useNavigate()
   const [showInfoModal, setShowInfoModal] = useState(false)
+
+  useEffect(() => {
+  const token = localStorage.getItem("jwtToken")
+  if (token) {
+    try {
+      const { exp } = jwtDecode(token)
+      const isExpired = Date.now() >= exp * 1000
+      if (!isExpired) {
+        navigate("/pages/home")  // 🔁 Redirect logged-in users
+      } else {
+        localStorage.removeItem("jwtToken")  // 🔒 Remove expired token
+      }
+    } catch (err) {
+      localStorage.removeItem("jwtToken") // 🛑 Invalid token
+    }
+  }
+}, [])
 
   return (
     <div className="relative h-screen w-full overflow-hidden">
@@ -111,8 +130,7 @@ const Landingpage = () => {
 
         {/* Subtitle */}
         <p className="text-blue-100/80 text-xl md:text-2xl font-light text-center max-w-2xl px-4 mb-10 animate-fade-in-up">
-          Where Professional Meets Personal – Seamlessly
-        </p>
+For the You… and the You        </p>
 
         {/* Feature Attributes */}
         <div className="flex flex-wrap justify-center gap-6 mb-10 px-4 animate-slide-in-features">
@@ -198,40 +216,52 @@ const Landingpage = () => {
             </button>
 
             {/* Modal Content */}
-            <div className="pr-8">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center">
-                  <Info className="w-5 h-5 text-blue-300" />
-                </div>
-                <h3 className="text-xl font-bold">Platform Information</h3>
-              </div>
+           <div className="pr-8">
+  <div className="flex items-center gap-3 mb-4">
+    <div className="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center">
+      <Info className="w-5 h-5 text-blue-300" />
+    </div>
+    <h3 className="text-xl font-bold">Platform Information</h3>
+  </div>
 
-              <div className="space-y-4 text-sm text-white/80">
-                <p>
-                  <strong className="text-white">Version:</strong> 2.0.1 Beta
-                </p>
-                <p>
-                  <strong className="text-white">Status:</strong>
-                  <span className="text-green-300 ml-1">Fully Operational</span>
-                </p>
-                <p>
-                  <strong className="text-white">Security:</strong> End-to-end encrypted communications
-                </p>
-                <p>
-                  <strong className="text-white">Features:</strong> Real-time messaging, content sharing, professional
-                  networking, and advanced privacy controls.
-                </p>
-                <p>
-                  <strong className="text-white">Support:</strong> 24/7 technical assistance available
-                </p>
-              </div>
+  {/* Tweniq Description */}
+  <div className="text-sm text-white/90 mb-6">
+    <p className="mb-2 font-medium text-white">
+      Tweniq is a dual-mode social platform that lets you seamlessly switch between your personal and professional identities.
+    </p>
+    <p>
+      Create posts, enjoy your feed, and chat with friends — all with two identities. Tweniq is built for both sides of you —
+      social and professional. Switch effortlessly, express freely, and keep both identities active in one seamless space.
+    </p>
+  </div>
 
-              <div className="mt-6 pt-4 border-t border-white/20">
-                <p className="text-xs text-white/60 text-center">
-                  Built with cutting-edge technology for the modern social experience
-                </p>
-              </div>
-            </div>
+  <div className="space-y-4 text-sm text-white/80">
+    <p>
+      <strong className="text-white">Version:</strong> 1.0.0 
+    </p>
+    <p>
+      <strong className="text-white">Status:</strong>
+      <span className="text-green-300 ml-1">Fully Operational</span>
+    </p>
+    
+  </div>
+
+  <div className="mt-6 pt-4 border-t border-white/20">
+    <p className="text-xs text-white/60 text-center mb-1">
+      For the You… and the You
+    </p>
+    <p className="text-xs text-white/60 text-center">
+      BY: <span className="text-white">Tanish Dhingra</span> | 
+      <a
+        href="mailto:tanishdingra2003@gmail.com"
+        className="text-blue-300 hover:underline ml-1"
+      >
+        tanishdingra2003@gmail.com
+      </a>
+    </p>
+  </div>
+</div>
+
           </div>
         </div>
       )}
