@@ -4,6 +4,9 @@ import { motion } from "framer-motion"
 import { Send, X, BarChart3, Smile, Users, Sparkles } from "lucide-react"
 import { useProfile } from "../context/AppContext"
 import { useApp } from "../context/AppContext"
+import { checkTokenValidity } from "../utils/checkToken"; // ✅ Already done in other components
+import { useNavigate } from "react-router-dom"
+
 
 const APIURL = import.meta.env.VITE_API_BASE_URL
 
@@ -24,6 +27,8 @@ export default function CreatePostPage() {
   const [title, setTitle] = useState("")
   const [content, setContent] = useState("")
   const [friendexists, setfriendexists] = useState("")
+  const navigate = useNavigate();
+
   const [pollOptions, setPollOptions] = useState([
     { id: "1", text: "" },
     { id: "2", text: "" },
@@ -73,6 +78,8 @@ export default function CreatePostPage() {
         options: pollOptions.map((option) => option.text).filter((text) => text),
       },
     }
+      if (!checkTokenValidity()) return;
+
     try {
       const jwtToken = localStorage.getItem("jwtToken")
       if (!jwtToken) {
@@ -98,7 +105,10 @@ export default function CreatePostPage() {
           { id: "2", text: "" },
           { id: "3", text: "" },
           { id: "4", text: "" },
+          
         ])
+        navigate("/pages/feed");
+
       } else {
         alert(data.message || "Failed to create professional post")
       }
@@ -117,6 +127,8 @@ export default function CreatePostPage() {
       moodEmoji: selectedMood?.emoji || "",
       taggedFriend: taggedfriend?.trim() || null,
     }
+      if (!checkTokenValidity()) return;
+
     try {
       if (taggedfriend.trim() && friendexists !== true) {
         alert("Please ensure the tagged friend's username exists.")
@@ -144,6 +156,7 @@ export default function CreatePostPage() {
         setSelectedMood(null)
         settaggedfriend("")
         setfriendexists(null)
+        navigate("/pages/feed")
       } else {
         alert(data.message || "Failed to create social post")
       }

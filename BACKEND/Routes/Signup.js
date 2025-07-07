@@ -196,7 +196,9 @@ router.post("/saveprofiledata", upload.fields([
 
     const token = jwt.sign(
       { userId: user._id },
-      process.env.JWT_SECRET
+      process.env.JWT_SECRET,
+        { expiresIn: "7d" }  // or "15m", "1h", "30d"
+
     );
 
     return res.status(200).json({

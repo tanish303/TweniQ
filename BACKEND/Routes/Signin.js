@@ -36,7 +36,9 @@ const user = await User.findOne({ email: new RegExp(`^${email}$`, "i") });
     // Generate JWT
         const token = jwt.sign(
           { userId: user._id },
-          process.env.JWT_SECRET
+          process.env.JWT_SECRET,
+            { expiresIn: "7d" }  // ⏳ Token expires in 7 days
+
         );
 
     // Respond with token and username

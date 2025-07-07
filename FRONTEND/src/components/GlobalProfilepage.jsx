@@ -4,6 +4,8 @@ import { useParams, useNavigate } from "react-router-dom"
 import axios from "axios"
 import { motion } from "framer-motion"
 import { ArrowLeft, FileText, Briefcase, Heart, User, UserPlus, Sparkles, Calendar, Check } from "lucide-react"
+import { checkTokenValidity } from "../utils/checkToken"
+
 
 const APIURL = import.meta.env.VITE_API_BASE_URL
 
@@ -17,6 +19,8 @@ export default function GlobalProfilepage() {
   const [followerCount, setFollowerCount] = useState(0)
 
   const handleToggleFollow = async () => {
+    if (!checkTokenValidity()) return;
+
     const token = localStorage.getItem("jwtToken")
     if (!token) return alert("You must be logged in to follow users.")
     try {
@@ -37,6 +41,8 @@ export default function GlobalProfilepage() {
   }
 
   useEffect(() => {
+    if (!checkTokenValidity()) return;
+
     ;(async () => {
       try {
         setLoading(true)
@@ -127,7 +133,7 @@ export default function GlobalProfilepage() {
           onClick={() => navigate(-1)}
           className="mb-4 flex items-center gap-2 text-gray-600 hover:text-purple-600 transition-all duration-200 bg-white/70 backdrop-blur-sm px-3 py-1.5 rounded-lg shadow-md hover:shadow-lg w-fit text-sm"
         >
-          <ArrowLeft className="h-3 h-3" />
+          <ArrowLeft className=" h-3" />
           <span className="font-medium">Back</span>
         </motion.button>
 
@@ -300,6 +306,7 @@ export default function GlobalProfilepage() {
                     <div className="absolute -bottom-1 -right-1 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full p-0.5">
                       <Briefcase className="w-2 h-2 text-white" />
                     </div>
+
                   </div>
 
                   {/* Professional Info */}

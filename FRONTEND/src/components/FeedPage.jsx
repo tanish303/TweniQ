@@ -8,6 +8,8 @@ import { useNavigate } from "react-router-dom"
 import { useEffect } from "react"
 import axios from "axios"
 import { Link } from "react-router-dom"
+import { checkTokenValidity } from "../utils/checkToken"
+
 
 export default function FeedPage() {
   const { profileMode } = useProfile()
@@ -19,6 +21,8 @@ export default function FeedPage() {
   const APIURL = import.meta.env.VITE_API_BASE_URL
 
   const handleSaveToggle = async (postId) => {
+      if (!checkTokenValidity()) return; // ❗Redirects and alerts already handled inside the function
+
     const username = localStorage.getItem("username")
     const mode = profileMode
     console.log(mode)
@@ -43,6 +47,8 @@ export default function FeedPage() {
   }
 
   const handleToggleFollow = async (authorUsername, postId) => {
+    if (!checkTokenValidity()) return;
+
     const currentUsername = localStorage.getItem("username")
     if (!currentUsername) {
       console.error("No username found in localStorage.")
@@ -65,6 +71,8 @@ export default function FeedPage() {
   }
 
   const handleLikeToggle = async (postId) => {
+    if (!checkTokenValidity()) return;
+
     try {
       const username = localStorage.getItem("username")
       const mode = profileMode
@@ -97,6 +105,8 @@ export default function FeedPage() {
   }
 
   const handleVote = async (selectedOption, postId) => {
+    if (!checkTokenValidity()) return;
+
     const jwtToken = localStorage.getItem("jwtToken")
     if (!jwtToken) return toast.error("You must be logged in")
     try {
@@ -135,13 +145,15 @@ export default function FeedPage() {
   }
 
   const handleCommentSection = (postId) => {
-    console.log("me")
+
     navigate("/commentsection", {
       state: { postId },
     })
   }
 
   const fetchSocialPosts = async () => {
+    if (!checkTokenValidity()) return;
+
     try {
       setLoading(true)
       const jwtToken = localStorage.getItem("jwtToken")
@@ -170,6 +182,8 @@ export default function FeedPage() {
   }
 
   const fetchProfessionalPosts = async () => {
+    if (!checkTokenValidity()) return;
+
     try {
       setLoading(true)
       const jwtToken = localStorage.getItem("jwtToken")

@@ -3,6 +3,8 @@ import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { useProfile } from "../context/AppContext"
 import { useNavigate } from "react-router-dom"
+import { checkTokenValidity } from "../utils/checkToken"; // ✅ Import this
+
 import axios from "axios"
 import {
   Search,
@@ -37,6 +39,7 @@ export default function ChatPage() {
   const deleteConversation = async (roomId) => {
     const confirmDelete = window.confirm("Delete this conversation?")
     if (!confirmDelete) return
+  if (!checkTokenValidity()) return;
 
     try {
       await axios.delete(`${API}/chat/room/${roomId}`, {
@@ -57,6 +60,7 @@ export default function ChatPage() {
       setError("Please enter a username.")
       return
     }
+  if (!checkTokenValidity()) return;
 
     setIsSearching(true)
     try {
@@ -78,6 +82,8 @@ export default function ChatPage() {
 
   // 💬 Load conversation list
   useEffect(() => {
+      if (!checkTokenValidity()) return;
+
     axios
       .get(`${API}/chat/conversations`, {
         params: { mode: profileMode },

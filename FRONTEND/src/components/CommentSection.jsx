@@ -7,6 +7,8 @@ import { useProfile } from "../context/AppContext"
 import { MessageCircle, Send, User, Clock } from "lucide-react"
 import "react-toastify/dist/ReactToastify.css"
 import { useLocation } from "react-router-dom"
+import { checkTokenValidity } from "../utils/checkToken"; // ✅ Import
+
 
 const APIURL = import.meta.env.VITE_API_BASE_URL
 
@@ -17,7 +19,6 @@ const CommentSection = () => {
   const postId = location.state?.postId
   const [comments, setComments] = useState([])
   const commentRef = useRef()
-  const jwtToken = localStorage.getItem("jwtToken")
   const isProfessional = profileMode === "professional"
 
   /* ───────── Fetch comments ───────── */
@@ -28,7 +29,6 @@ const CommentSection = () => {
       const data = await res.json()
       if (res.ok && data.success) {
         setComments(data.comments)
-        console.log(data.comments);
       } else {
         console.error("Failed to fetch comments:", data.message)
       }
@@ -46,6 +46,9 @@ const CommentSection = () => {
     e.preventDefault()
     const comment = commentRef.current.value.trim()
     if (!comment) return toast.warn("Comment cannot be empty")
+        if (!checkTokenValidity()) return;
+  const jwtToken = localStorage.getItem("jwtToken")
+
     if (!jwtToken) return toast.error("You must be logged in")
 
     try {

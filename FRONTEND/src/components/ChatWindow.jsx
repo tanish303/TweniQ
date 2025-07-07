@@ -9,6 +9,8 @@ import axios from "axios"
 import { jwtDecode } from "jwt-decode"
 import { useProfile } from "../context/AppContext"
 import { ArrowLeft, Send, User, Calendar } from "lucide-react"
+import { checkTokenValidity } from "../utils/checkToken"; // ✅ Import the function
+
 
 const API = import.meta.env.VITE_API_BASE_URL
 
@@ -71,6 +73,8 @@ export default function ChatWindow() {
 
   // Fetch partner info
   useEffect(() => {
+      if (!checkTokenValidity()) return; // ✅ Check before making request
+
     ;(async () => {
       try {
         const { data } = await axios.get(`${API}/chat/room/${roomId}/info`, {
@@ -90,6 +94,8 @@ export default function ChatWindow() {
 
   // Fetch message history
   useEffect(() => {
+      if (!checkTokenValidity()) return; // ✅ Check before loading messages
+
     axios
       .get(`${API}/chat/room/${roomId}/messages`, {
         headers: {

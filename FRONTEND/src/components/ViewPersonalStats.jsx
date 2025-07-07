@@ -6,6 +6,7 @@ import axios from "axios"
 import { motion } from "framer-motion"
 import { useProfile } from "../context/AppContext"
 import { Link } from "react-router-dom";
+import { checkTokenValidity } from "../utils/checkToken"
 
 import {
   ArrowLeft,
@@ -36,6 +37,8 @@ export default function ViewPersonalStats() {
 
   useEffect(() => {
     const fetchData = async () => {
+      if (!checkTokenValidity()) return;
+
       try {
         setLoading(true)
         const token = localStorage.getItem("jwtToken")

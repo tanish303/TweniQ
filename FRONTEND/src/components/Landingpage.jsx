@@ -22,6 +22,7 @@ const Landingpage = () => {
         navigate("/pages/home")  // 🔁 Redirect logged-in users
       } else {
         localStorage.removeItem("jwtToken")  // 🔒 Remove expired token
+        alert("Your session has expired. Please sign in again.")  // 🚨 Notify user
       }
     } catch (err) {
       localStorage.removeItem("jwtToken") // 🛑 Invalid token

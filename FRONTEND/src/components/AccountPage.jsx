@@ -6,6 +6,8 @@ import { User, Bookmark, FileText, Heart, Lock, Users, UserPlus, Mail, Calendar,
 import { useProfile } from "../context/AppContext"
 import { useEffect } from "react"
 import axios from "axios"
+import { checkTokenValidity } from "../utils/checkToken"; // ✅ import the function
+
 
 export default function AccountPage() {
   const APIURL = import.meta.env.VITE_API_BASE_URL
@@ -15,22 +17,26 @@ export default function AccountPage() {
   const isProfessional = profileMode === "professional"
   const navigate = useNavigate()
 
-  useEffect(() => {
-    const fetchOverview = async () => {
-      try {
-        const token = localStorage.getItem("jwtToken")
-        const res = await axios.get(`${APIURL}/account/overview`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-        setOverview(res.data)
-      } catch (err) {
-        console.error("Failed to fetch overview", err)
-      }
+ useEffect(() => {
+  const fetchOverview = async () => {
+    // ✅ Check token validity first
+    if (!checkTokenValidity()) return;
+
+    try {
+      const token = localStorage.getItem("jwtToken");
+      const res = await axios.get(`${APIURL}/account/overview`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setOverview(res.data);
+    } catch (err) {
+      console.error("Failed to fetch overview", err);
     }
-    fetchOverview()
-  }, [])
+  };
+
+  fetchOverview();
+}, []);
 
   const logout = () => {
     localStorage.removeItem("jwtToken")
