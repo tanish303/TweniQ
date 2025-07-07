@@ -23,11 +23,13 @@ router.get("/search", async (req, res) => {
   if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
   const { q, mode } = req.query;            // ?q=john&mode=social
-  if (!q) return res.status(400).json({ message: "Search username  missing" });
+  if (!q) return res.status(400).json({ message: "Search username missing" });
 
-const user = await User.findOne(
-  { username: new RegExp(`^${q}$`, "i") }   // ← exact match, case‑insensitive
-).lean();   if (!user) return res.status(404).json({ message: "User not found" });
+  const user = await User.findOne(
+    { username: new RegExp(`^${q}$`, "i") }   // ← exact match, case-insensitive
+  ).lean();
+
+  if (!user) return res.status(404).json({ message: "User not found" });
 
   const profile = user[`${mode}Profile`];
   if (!profile)
@@ -37,6 +39,8 @@ const user = await User.findOne(
     user: {
       _id:       user._id,
       username:  user.username,
+      name:      profile.name,          // ✅ send name based on mode
+      dpUrl:     profile.dpUrl || null, // ✅ send dpUrl if present
       followers: user.followersCount,
       following: user.followingCount,
       posts:     profile.posts.length,
@@ -73,24 +77,36 @@ router.get("/conversations", async (req, res) => {
   if (!userId) return res.status(401).json({ message: "Unauthorized token, Please Signin again" });
 
   const { mode } = req.query;
+  if (!mode || !["professional", "social"].includes(mode)) {
+    return res.status(400).json({ message: "Invalid or missing mode" });
+  }
 
-  const rooms = await ChatRoom.find({
-    participants: userId,
-    mode,
-  })
-    .populate("participants", "username")
-    .sort({ updatedAt: -1 })
-    .lean();
+  try {
+    const rooms = await ChatRoom.find({
+      participants: userId,
+      mode,
+    })
+      .populate("participants", "username professionalProfile.name professionalProfile.dpUrl socialProfile.name socialProfile.dpUrl")
+      .sort({ updatedAt: -1 })
+      .lean();
 
-  const conv = rooms.map((r) => {
-    const other = r.participants.find((u) => u._id.toString() !== userId);
-    return {
-      roomId: r._id,
-      username: other?.username || "Unknown",
-    };
-  });
+    const conv = rooms.map((r) => {
+      const other = r.participants.find((u) => u._id.toString() !== userId);
+      const profile = other?.[`${mode}Profile`] || {};
 
-  res.json({ conversations: conv });
+      return {
+        roomId: r._id,
+        username: other?.username || "Unknown",
+        name: profile.name || "Unnamed",
+        dpUrl: profile.dpUrl || null,
+      };
+    });
+
+    res.json({ conversations: conv });
+  } catch (err) {
+    console.error("Error fetching conversations:", err);
+    res.status(500).json({ message: "Server error" });
+  }
 });
 
 
@@ -107,12 +123,17 @@ router.get("/room/:id/messages", async (req, res) => {
 });
 
 /* 👤 Get partner name for a room */
+/* 👤 Get partner info for a room */
 router.get("/room/:id/info", async (req, res) => {
   const userId = verifyToken(req);
   if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
+  const { mode } = req.query;
+  if (!["social", "professional"].includes(mode))
+    return res.status(400).json({ message: "Invalid mode" });
+
   const room = await ChatRoom.findById(req.params.id)
-    .populate("participants", "username")
+    .populate("participants", "username socialProfile professionalProfile")
     .lean();
 
   if (!room) return res.status(404).json({ message: "Room not found" });
@@ -120,8 +141,16 @@ router.get("/room/:id/info", async (req, res) => {
   const partner = room.participants.find((p) => p._id.toString() !== userId);
   if (!partner) return res.status(400).json({ message: "Partner not found" });
 
-  res.json({ partnerUsername: partner.username }); // 👈 send username only
+  const profile = partner[`${mode}Profile`];
+  if (!profile) return res.status(404).json({ message: `${mode} profile not found` });
+
+  res.json({
+    partnerUsername: partner.username,
+    name: profile.name,
+    dpUrl: profile.dpUrl || null,
+  });
 });
+
 
 // ❌ Delete chat room and all messages
 router.delete("/room/:id", async (req, res) => {

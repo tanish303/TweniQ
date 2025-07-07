@@ -458,14 +458,14 @@ const Setupprofile = () => {
                     required
                     options={[
                       { value: "", label: "Select your occupation" },
-                      { value: "developer", label: "Developer" },
-                      { value: "designer", label: "Designer" },
-                      { value: "marketer", label: "Marketer" },
-                      { value: "student", label: "Student" },
-                      { value: "teacher", label: "Teacher" },
-                      { value: "freelancer", label: "Freelancer" },
-                      { value: "business_owner", label: "Business Owner" },
-                      { value: "other", label: "Other" },
+                      { value: "Developer", label: "Developer" },
+                      { value: "Designer", label: "Designer" },
+                      { value: "Marketer", label: "Marketer" },
+                      { value: "Student", label: "Student" },
+                      { value: "Teacher", label: "Teacher" },
+                      { value: "Freelancer", label: "Freelancer" },
+                      { value: "Business Owner", label: "Business Owner" },
+                      { value: "Other", label: "Other" },
                     ]}
                   />
                 </div>
@@ -516,14 +516,14 @@ const Setupprofile = () => {
                     required
                     options={[
                       { value: "", label: "Select your main interest" },
-                      { value: "reading", label: "Reading" },
-                      { value: "traveling", label: "Traveling" },
-                      { value: "gaming", label: "Gaming" },
-                      { value: "sports", label: "Sports" },
-                      { value: "music", label: "Music" },
-                      { value: "art", label: "Art" },
-                      { value: "coding", label: "Coding" },
-                      { value: "other", label: "Other" },
+                      { value: "Reading", label: "Reading" },
+                      { value: "Traveling", label: "Traveling" },
+                      { value: "Gaming", label: "Gaming" },
+                      { value: "Sports", label: "Sports" },
+                      { value: "Music", label: "Music" },
+                      { value: "Art", label: "Art" },
+                      { value: "Coding", label: "Coding" },
+                      { value: "Other", label: "Other" },
                     ]}
                   />
                 </div>

@@ -1,13 +1,14 @@
 "use client"
 
+import { Link } from "react-router-dom"
 import { useParams, useNavigate } from "react-router-dom"
-import { useEffect, useState, useMemo } from "react"
+import { useEffect, useState, useMemo, useRef } from "react"
 import { motion } from "framer-motion"
 import { io } from "socket.io-client"
 import axios from "axios"
 import { jwtDecode } from "jwt-decode"
 import { useProfile } from "../context/AppContext"
-import { ArrowLeft, Send, User, Clock, Calendar } from "lucide-react"
+import { ArrowLeft, Send, User, Calendar } from "lucide-react"
 
 const API = import.meta.env.VITE_API_BASE_URL
 
@@ -46,6 +47,9 @@ export default function ChatWindow() {
   const [msgs, setMsgs] = useState([])
   const [text, setText] = useState("")
   const [partnerUsername, setPartnerUsername] = useState("Partner")
+  const [partnerName, setPartnerName] = useState("")
+  const [partnerDpUrl, setPartnerDpUrl] = useState("")
+
   const isProfessional = profileMode === "professional"
 
   const myId = useMemo(() => {
@@ -57,21 +61,32 @@ export default function ChatWindow() {
     }
   }, [])
 
-  // Fetch partner username once
+  // 👉 ref to scroll to bottom
+  const bottomRef = useRef(null)
+
+  // scroll on new messages
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" })
+  }, [msgs])
+
+  // Fetch partner info
   useEffect(() => {
     ;(async () => {
       try {
         const { data } = await axios.get(`${API}/chat/room/${roomId}/info`, {
+          params: { mode: profileMode },
           headers: {
             Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
           },
         })
         setPartnerUsername(data.partnerUsername)
+        setPartnerName(data.name)
+        setPartnerDpUrl(data.dpUrl || "")
       } catch (err) {
-        console.error("Couldn't fetch partner username", err)
+        console.error("Couldn't fetch partner info", err)
       }
     })()
-  }, [roomId])
+  }, [roomId, profileMode])
 
   // Fetch message history
   useEffect(() => {
@@ -83,7 +98,6 @@ export default function ChatWindow() {
       })
       .then((res) => {
         setMsgs(res.data.messages)
-        console.log("Fetched messages:", res.data.messages) // 👈 Log after fetching
       })
       .catch((err) => console.error(err))
   }, [roomId])
@@ -134,31 +148,44 @@ export default function ChatWindow() {
               </button>
 
               <div className="flex items-center gap-3">
-                <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center shadow-md ${
-                    isProfessional
-                      ? "bg-gradient-to-r from-blue-500 to-indigo-600"
-                      : "bg-gradient-to-r from-pink-500 to-purple-600"
-                  }`}
-                >
-                  <User className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <h2 className="font-semibold text-gray-900">{partnerUsername}</h2>
-                  <div className="flex items-center gap-1">
+                {partnerDpUrl ? (
+                  <img
+                    src={`${API}${partnerDpUrl}`}
+                    alt={partnerUsername}
+                    className="w-10 h-10 rounded-full object-cover object-center shadow-md"
+                  />
+                ) : (
+                  <div
+                    className={`w-10 h-10 rounded-full flex items-center justify-center shadow-md ${
+                      isProfessional
+                        ? "bg-gradient-to-r from-blue-500 to-indigo-600"
+                        : "bg-gradient-to-r from-pink-500 to-purple-600"
+                    }`}
+                  >
+                    <User className="w-5 h-5 text-white" />
                   </div>
+                )}
+
+                <div>
+                  <Link to={`/showuser/${partnerUsername}`} className="block leading-tight">
+                    <h2 className="text-sm font-semibold text-gray-900 hover:underline">
+                      {partnerName || partnerUsername}
+                    </h2>
+                    <p className="text-xs text-blue-600 font-medium">@{partnerUsername}</p>
+                  </Link>
                 </div>
               </div>
             </div>
           </div>
         </motion.div>
 
-        {/* Messages Container */}
-<div
-  className={`flex-1 overflow-hidden border-2 ${
-    profileMode === "social" ? "border-pink-100" : "border-blue-100"
-  }`}
->          <div className="h-full overflow-y-auto p-6 space-y-4">
+        {/* Messages */}
+        <div
+          className={`flex-1 overflow-hidden border-2 ${
+            profileMode === "social" ? "border-pink-100" : "border-blue-100"
+          }`}
+        >
+          <div className="h-full overflow-y-auto p-6 space-y-4">
             {msgs.length === 0 ? (
               <motion.div
                 className="flex flex-col items-center justify-center h-full text-center"
@@ -215,13 +242,11 @@ export default function ChatWindow() {
                           >
                             {isMe ? "You" : partnerUsername}
                           </span>
-                          <div className="flex items-center gap-1">
-                            <span className="text-xs text-gray-400">{formatTime(m.createdAt)}</span>
-                          </div>
+                          <span className="text-xs text-gray-400">{formatTime(m.createdAt)}</span>
                         </div>
 
                         <div
-                          className={`relative px-4 py-3 rounded-2xl shadow-sm max-w-full break-words ${
+                          className={`relative px-4 py-3 rounded-2xl shadow-sm break-words ${
                             isMe
                               ? isProfessional
                                 ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white"
@@ -237,10 +262,11 @@ export default function ChatWindow() {
                 )
               })
             )}
+            <div ref={bottomRef} /> {/* 👈 Scroll target */}
           </div>
         </div>
 
-        {/* Input Section */}
+        {/* Input */}
         <motion.div
           className={`border-0 shadow-lg ${
             isProfessional ? "bg-white" : "bg-gradient-to-r from-white/90 to-purple-50/50 backdrop-blur-sm"
@@ -275,65 +301,6 @@ export default function ChatWindow() {
             </div>
           </div>
         </motion.div>
-      </div>
-
-      {/* Background Decorations */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
-        {isProfessional ? (
-          <>
-            <motion.div
-              className="absolute top-32 right-32 w-28 h-28 bg-blue-200/10 rounded-full blur-xl"
-              animate={{
-                scale: [1, 1.05, 1],
-                x: [0, 10, 0],
-              }}
-              transition={{
-                duration: 25,
-                repeat: Number.POSITIVE_INFINITY,
-                ease: "easeInOut",
-              }}
-            />
-            <motion.div
-              className="absolute bottom-32 left-32 w-20 h-20 bg-slate-300/8 rounded-full blur-lg"
-              animate={{
-                scale: [1.05, 1, 1.05],
-                rotate: [0, 45, 90],
-              }}
-              transition={{
-                duration: 30,
-                repeat: Number.POSITIVE_INFINITY,
-                ease: "linear",
-              }}
-            />
-          </>
-        ) : (
-          <>
-            <motion.div
-              className="absolute top-20 left-20 w-32 h-32 bg-pink-300/15 rounded-full blur-2xl"
-              animate={{
-                scale: [1, 1.1, 1],
-                rotate: [0, 90, 180],
-              }}
-              transition={{
-                duration: 20,
-                repeat: Number.POSITIVE_INFINITY,
-                ease: "linear",
-              }}
-            />
-            <motion.div
-              className="absolute bottom-20 right-40 w-24 h-24 bg-purple-300/20 rounded-full blur-xl"
-              animate={{
-                scale: [1.1, 1, 1.1],
-                rotate: [180, 90, 0],
-              }}
-              transition={{
-                duration: 15,
-                repeat: Number.POSITIVE_INFINITY,
-                ease: "linear",
-              }}
-            />
-          </>
-        )}
       </div>
     </div>
   )

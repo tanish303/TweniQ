@@ -5,6 +5,8 @@ import { useNavigate, useParams } from "react-router-dom"
 import axios from "axios"
 import { motion } from "framer-motion"
 import { useProfile } from "../context/AppContext"
+import { Link } from "react-router-dom";
+
 import {
   ArrowLeft,
   User,
@@ -18,7 +20,7 @@ import {
   Loader2,
 } from "lucide-react"
 
-export default function ViewPersonalPosts() {
+export default function ViewPersonalStats() {
   const APIURL = import.meta.env.VITE_API_BASE_URL
   const { profileMode } = useProfile()
   const { category } = useParams()
@@ -227,8 +229,12 @@ export default function ViewPersonalPosts() {
                       <User className="w-6 h-6 text-white" />
                     </div>
                     <div className="flex-1">
-                      <h3 className="font-semibold text-gray-900">{user.username}</h3>
-                    </div>
+<h3 className="font-semibold text-gray-900">
+  <Link to={`/showuser/${user.username}`} className="text-purple-600 hover:underline">
+    {user.username}
+
+  </Link>
+</h3>                    </div>
                   </div>
                 </div>
               </motion.div>

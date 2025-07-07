@@ -16,6 +16,7 @@ const Comments      = require("./Routes/Comments");
 const Poll          = require("./Routes/Poll");
 const AccountInfo   = require("./Routes/AccountInfo");
 const Chat          = require("./Routes/Chat");
+const GlobalUserData          = require("./Routes/GlobalUserData");
 
 const app = express();
 app.use(cors());
@@ -36,6 +37,7 @@ app.use("/comments",     Comments);
 app.use("/poll",         Poll);
 app.use("/account",      AccountInfo);
 app.use("/chat",         Chat);
+app.use("/showuser",         GlobalUserData);
 
 /* ---------- Create HTTP server & attach Socket.IO ---------- */
 const server = http.createServer(app);

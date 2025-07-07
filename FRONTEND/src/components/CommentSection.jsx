@@ -28,6 +28,7 @@ const CommentSection = () => {
       const data = await res.json()
       if (res.ok && data.success) {
         setComments(data.comments)
+        console.log(data.comments);
       } else {
         console.error("Failed to fetch comments:", data.message)
       }
@@ -173,7 +174,17 @@ const CommentSection = () => {
                       {/* Comment Content */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-2">
-                          <h4 className="font-semibold text-gray-900">{comment.displayName}</h4>
+<div>
+  <h4 className="font-semibold text-gray-900">{comment.displayName}</h4>
+  {comment.username && (
+    <a
+      href={`/showuser/${comment.username}`}
+      className="text-xs text-blue-600 hover:underline block"
+    >
+      @{comment.username}
+    </a>
+  )}
+</div>
                           {isProfessional && (
                             <span className="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded-full">Pro</span>
                           )}

@@ -28,8 +28,11 @@ router.get("/getcomments", async (req, res) => {
 
       let displayName = "Unknown";
       let dpUrl = null;
+      let username = null;
 
       if (user) {
+        username = user.username || null;
+
         if (mode === "professional") {
           displayName = user.professionalProfile?.name || "Unknown";
           dpUrl = user.professionalProfile?.dpUrl || null;
@@ -40,6 +43,7 @@ router.get("/getcomments", async (req, res) => {
       }
 
       return {
+        username,       // 👈 new field
         displayName,
         dpUrl,
         text: c.comment,
@@ -53,6 +57,7 @@ router.get("/getcomments", async (req, res) => {
     return res.status(500).json({ success: false, message: "Server error" });
   }
 });
+
 
 
 

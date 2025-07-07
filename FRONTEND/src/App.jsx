@@ -14,9 +14,10 @@ import CreatePostPage from "./components/CreatePostPage"
 import AccountPage from "./components/AccountPage"
 import CommentSection from "./components/CommentSection"
 import { AppProvider } from "./context/AppContext"
-import ViewPersonalPosts from "./components/ViewPersonalPosts"
+import ViewPersonalStats from "./components/ViewPersonalStats"
 import ChatPage      from "./components/ChatPage";     // <-- list + search
 import ChatWindow    from "./components/ChatWindow";   // <-- messages
+import GlobalProfilepage from "./components/GlobalProfilepage"
 
 function App() {
   return (
@@ -29,9 +30,11 @@ function App() {
           <Route path="/signin" element={<Signin />} />
           <Route path="/resetPassword" element={<ResetPassword />} />
           <Route path="/commentsection" element={<CommentSection />} />
-          <Route path="/account/:category" element={<ViewPersonalPosts />} />
+          <Route path="/account/:category" element={<ViewPersonalStats />} />
           <Route path="/chat"            element={<ChatPage />} />        
           <Route path="/chat/:roomId"    element={<ChatWindow />} />
+          <Route path="/showuser/:username" element={<GlobalProfilepage />} />
+
    
 
           <Route path="/pages" element={<Pages />}>
