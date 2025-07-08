@@ -1,40 +1,41 @@
-# Ignore node_modules in both frontend and backend
-frontend/node_modules/
-backend/node_modules/
+# ✅ Node modules (don't track installed packages)
+FRONTEND/node_modules/
+BACKEND/node_modules/
 
-# Ignore build outputs
-frontend/dist/
-frontend/build/
-backend/dist/
-backend/build/
+# ✅ Build outputs
+FRONTEND/dist/
+FRONTEND/build/
+BACKEND/dist/
+BACKEND/build/
 
-# Logs
+# ✅ Logs
 logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# OS-specific files
+# ✅ OS-specific files
 .DS_Store
 Thumbs.db
 
-# Environment variables
-frontend/.env
-frontend/.env.local
-frontend/.env.*.local
+# ✅ Environment variable files (do NOT upload secrets)
+FRONTEND/.env
+FRONTEND/.env.local
+FRONTEND/.env.*.local
 
-backend/.env
-backend/.env.local
-backend/.env.*.local
+BACKEND/.env
+BACKEND/.env.local
+BACKEND/.env.*.local
 
-# Vite cache (frontend)
-frontend/.vite/
+BACKEND/uploads
+# ✅ Vite cache (for FRONTEND)
+FRONTEND/.vite/
 
-# IDEs & editors
+# ✅ IDE/editor configs
 .vscode/
 .idea/
 
-# Testing & coverage
+# ✅ Testing and coverage
 coverage/
 *.lcov
