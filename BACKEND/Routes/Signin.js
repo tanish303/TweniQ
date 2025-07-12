@@ -23,7 +23,9 @@ const user = await User.findOne({ email: new RegExp(`^${email}$`, "i") });
     if (!user) {
       return res.status(404).json({ message: "User with this email does not exist" });
     }
-
+if (!user.password || typeof user.password !== "string") {
+      return res.status(500).json({ message: "User account is missing a password. Please reset your password or contact support." });
+    }
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       return res.status(401).json({ message: "Password is incorrect for this email" });

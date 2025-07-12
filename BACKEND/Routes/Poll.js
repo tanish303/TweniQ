@@ -61,7 +61,6 @@ res.status(200).json({
   userVotedOption: selectedOption, // ✅ return this
 });
   } catch (err) {
-    console.error("Voting error:", err);
     res.status(500).json({ success: false, message: "Server error" });
   }
 });

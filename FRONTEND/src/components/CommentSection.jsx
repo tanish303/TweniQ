@@ -30,10 +30,10 @@ const CommentSection = () => {
       if (res.ok && data.success) {
         setComments(data.comments)
       } else {
-        console.error("Failed to fetch comments:", data.message)
+        alert.error("Failed to fetch comments:", data.message)
       }
     } catch (error) {
-      console.error("Error fetching comments:", error)
+      alert.error("Error fetching comments:", error)
     }
   }, [postId, mode])
 

@@ -117,11 +117,26 @@ export default function ChatWindow() {
     return () => socket.off("chat:receive", listener)
   }, [roomId])
 
-  const send = () => {
-    if (!text.trim()) return
-    socket.emit("chat:send", { roomId, text })
-    setText("")
-  }
+const send = () => {
+  if (!text.trim()) return;
+
+  const msg = {
+    _id: `${Date.now()}`, // temporary ID (can be anything unique)
+    text,
+    createdAt: new Date().toISOString(),
+    sender: myId,
+    room: roomId,
+  };
+
+  // Add own message manually
+  setMsgs((prev) => [...prev, msg]);
+
+  // Emit message to server (no need for acknowledgment here)
+  socket.emit("chat:send", { roomId, text });
+
+  setText("");
+};
+
 
   return (
     <div

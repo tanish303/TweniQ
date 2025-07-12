@@ -196,7 +196,7 @@ useEffect(() => {
         setUsernameStatus(data.available ? "available" : "taken")
       }
     } catch (error) {
-      console.error("Error checking username:", error)
+      alert("Error checking username:")
       setUsernameStatus(null)
     }
   }
@@ -297,7 +297,7 @@ useEffect(() => {
           <div className="text-center mb-8">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-100 rounded-full mb-4">
               <Sparkles className="w-5 h-5 text-indigo-600" />
-              <span className="text-indigo-800 font-semibold">Welcome to SocioFusion</span>
+              <span className="text-indigo-800 font-semibold">Welcome to TweniQ</span>
             </div>
             <h1 className="text-4xl font-bold text-gray-900 mb-2">Complete Your Profile</h1>
             <p className="text-gray-600 text-lg">Tell us about yourself to get started</p>
@@ -590,7 +590,7 @@ useEffect(() => {
               <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <CheckCircle className="w-8 h-8 text-green-600" />
               </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Welcome to SocioFusion! 🎉</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Welcome to TweniQ! 🎉</h2>
               <p className="text-gray-600 mb-6">
                 Your profile has been created successfully. Get ready to connect and grow!
               </p>

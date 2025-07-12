@@ -46,14 +46,11 @@ const handleSubmit = async (e) => {
 
       setglobalusername(username);
 
-      console.log("JWT Token:", localStorage.getItem("jwtToken"));
-      console.log("Username:", localStorage.getItem("username"));
 
       toast.success(`Log-in successful as ${username}!`);
       navigate("/pages");
     }
   } catch (err) {
-    console.log(err);
     setError(err.response?.data?.message || "An error occurred. Please try again.");
   } finally {
     setLoading(false);

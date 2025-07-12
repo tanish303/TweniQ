@@ -64,7 +64,7 @@ export default function CreatePostPage() {
         setfriendexists(false)
       }
     } catch (error) {
-      console.error("Error while checking username existence:", error)
+      alert.error("Error while checking username existence:", error)
       alert("An error occurred. Please try again later.")
     }
   }
@@ -96,8 +96,6 @@ export default function CreatePostPage() {
       })
       const data = await response.json()
       if (response.ok && data.success) {
-        alert("Professional post created successfully!")
-        console.log("Created Post:", data.post)
         setTitle("")
         setContent("")
         setPollOptions([
@@ -113,7 +111,6 @@ export default function CreatePostPage() {
         alert(data.message || "Failed to create professional post")
       }
     } catch (error) {
-      console.error("Error while creating professional post:", error)
       alert("An error occurred. Please try again later.")
     }
   }
@@ -150,7 +147,6 @@ export default function CreatePostPage() {
       const data = await response.json()
       if (response.ok && data.success) {
         alert("Social post created successfully!")
-        console.log("Created Post:", data.post)
         setTitle("")
         setContent("")
         setSelectedMood(null)
@@ -161,7 +157,6 @@ export default function CreatePostPage() {
         alert(data.message || "Failed to create social post")
       }
     } catch (error) {
-      console.error("Error while creating social post:", error)
       alert("An error occurred. Please try again later.")
     }
   }

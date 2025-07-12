@@ -47,9 +47,8 @@ export default function ViewPersonalStats() {
           headers: { Authorization: `Bearer ${token}` },
         })
         setData(isUserList ? res.data.users || [] : res.data.posts || [])
-        console.log("📦 Fetched:", res.data)
       } catch (err) {
-        console.error("❌ Fetch failed", err)
+        alert("❌ Fetch failed")
         setError("Failed to load data. Please try again later.")
       } finally {
         setLoading(false)
