@@ -1,4 +1,6 @@
 # ✅ Node modules (don't track installed packages)
+node_modules/
+
 FRONTEND/node_modules/
 BACKEND/node_modules/
 
@@ -28,7 +30,7 @@ BACKEND/.env
 BACKEND/.env.local
 BACKEND/.env.*.local
 
-BACKEND/uploads
+BACKEND/uploads/
 # ✅ Vite cache (for FRONTEND)
 FRONTEND/.vite/
 

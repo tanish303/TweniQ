@@ -31,7 +31,7 @@ export default function AccountPage() {
       });
       setOverview(res.data);
     } catch (err) {
-      console.error("Failed to fetch overview", err);
+      alert.error("Failed to fetch overview", err);
     }
   };
 
@@ -136,9 +136,7 @@ const dpUrl = rawDpPath ? `${APIURL}${rawDpPath}` : null;
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">
-      <button onClick={() => console.log(overview)}></button>
 
-      {/* Logout Confirmation Toast */}
       {showLogoutConfirm && (
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}

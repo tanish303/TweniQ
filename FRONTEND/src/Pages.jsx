@@ -56,7 +56,7 @@ export default function Pages() {
       <div className="fixed top-4 left-4 z-50">
         <motion.button
           onClick={toggleProfile}
-          className={`relative overflow-hidden px-6 py-2 rounded-xl font-semibold transition-all duration-500 shadow-lg ${
+          className={`relative overflow-hidden px-6 py-2 rounded-xl font-semibold transition-all duration-500 shadow-lg hover:cursor-pointer ${
             isProfessional
               ? "bg-gradient-to-r from-slate-700 via-blue-700 to-indigo-700 hover:from-slate-800 hover:via-blue-800 hover:to-indigo-800 text-white"
               : "bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 hover:from-pink-700 hover:via-purple-700 hover:to-indigo-700 text-white"
@@ -331,64 +331,7 @@ export default function Pages() {
         </motion.div>
       </div>
 
-      {/* Background Decorations */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        {!isProfessional ? (
-          <>
-            <motion.div
-              className="absolute top-20 left-20 w-32 h-32 bg-pink-300/15 rounded-full blur-2xl"
-              animate={{
-                scale: [1, 1.1, 1],
-                rotate: [0, 90, 180],
-              }}
-              transition={{
-                duration: 20,
-                repeat: Number.POSITIVE_INFINITY,
-                ease: "linear",
-              }}
-            />
-            <motion.div
-              className="absolute bottom-20 right-40 w-24 h-24 bg-purple-300/20 rounded-full blur-xl"
-              animate={{
-                scale: [1.1, 1, 1.1],
-                rotate: [180, 90, 0],
-              }}
-              transition={{
-                duration: 15,
-                repeat: Number.POSITIVE_INFINITY,
-                ease: "linear",
-              }}
-            />
-          </>
-        ) : (
-          <>
-            <motion.div
-              className="absolute top-32 right-32 w-28 h-28 bg-blue-200/10 rounded-full blur-xl"
-              animate={{
-                scale: [1, 1.05, 1],
-                x: [0, 10, 0],
-              }}
-              transition={{
-                duration: 25,
-                repeat: Number.POSITIVE_INFINITY,
-                ease: "easeInOut",
-              }}
-            />
-            <motion.div
-              className="absolute bottom-32 left-32 w-20 h-20 bg-slate-300/8 rounded-full blur-lg"
-              animate={{
-                scale: [1.05, 1, 1.05],
-                rotate: [0, 45, 90],
-              }}
-              transition={{
-                duration: 30,
-                repeat: Number.POSITIVE_INFINITY,
-                ease: "linear",
-              }}
-            />
-          </>
-        )}
-      </div>
+     
     </div>
   )
 }

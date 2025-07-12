@@ -172,6 +172,12 @@ const Setupprofile = () => {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [socialDpFile, setSocialDpFile] = useState(null)
   const [professionalDpFile, setProfessionalDpFile] = useState(null)
+useEffect(() => {
+  if (!email) {
+    alert("Email verificatoin is not done. Redirecting to landing page...");
+    navigate("/", { replace: true });
+  }
+}, []);
 
   const checkusernameavailable = async (e) => {
     const usernameatinstant = e.target.value
@@ -266,7 +272,6 @@ const Setupprofile = () => {
         alert("Failed to create user")
       }
     } catch (error) {
-      console.error("Error creating user:", error)
       alert("An error occurred. Please try again later.")
     } finally {
       setIsSubmitting(false)

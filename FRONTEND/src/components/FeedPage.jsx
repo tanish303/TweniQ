@@ -1,4 +1,5 @@
 "use client"
+
 import { useState } from "react"
 import { motion } from "framer-motion"
 import { ToastContainer, toast } from "react-toastify"
@@ -21,88 +22,115 @@ export default function FeedPage() {
   const APIURL = import.meta.env.VITE_API_BASE_URL
 
   const handleSaveToggle = async (postId) => {
-      if (!checkTokenValidity()) return; // ❗Redirects and alerts already handled inside the function
+  if (!checkTokenValidity()) return;
 
-    const username = localStorage.getItem("username")
-    const mode = profileMode
-    console.log(mode)
-    if (!username || !mode) {
-      console.error("Missing userId or mode")
-      return
+  try {
+    const jwtToken = localStorage.getItem("jwtToken");
+    const mode = profileMode;
+
+    if (!jwtToken || !postId || !mode) {
+      toast.error("Missing jwtToken, postId, or mode ,Please Signin again or contact the support team");
+      return;
     }
-    try {
-      const { data } = await axios.post(`${APIURL}/savepost/toggle-save-post`, {
-        username,
-        postId,
-        mode,
-      })
-      if (data.success) {
-        setPosts((prev) => prev.map((post) => (post.postId === postId ? { ...post, isSaved: data.isSaved } : post)))
-      } else {
-        console.warn("Failed to toggle save status")
+
+    const { data } = await axios.post(
+      `${APIURL}/savepost/toggle-save-post`,
+      { postId, mode },
+      {
+        headers: {
+          Authorization: `Bearer ${jwtToken}`,
+        },
       }
-    } catch (err) {
-      console.error("Error toggling saved status:", err)
-    }
-  }
+    );
 
-  const handleToggleFollow = async (authorUsername, postId) => {
-    if (!checkTokenValidity()) return;
-
-    const currentUsername = localStorage.getItem("username")
-    if (!currentUsername) {
-      console.error("No username found in localStorage.")
-      return
-    }
-    try {
-      const response = await axios.post(`${APIURL}/ff/toggle-follow`, {
-        targetUsername: authorUsername,
-        currentUsername: currentUsername,
-      })
-      if (response.status === 200) {
-        const updatedPosts = posts.map((post) =>
-          post.postId === postId ? { ...post, isFollowing: response.data.isFollowing } : post,
+    if (data.success) {
+      setPosts((prev) =>
+        prev.map((post) =>
+          post.postId === postId ? { ...post, isSaved: data.isSaved } : post
         )
-        setPosts(updatedPosts)
-      }
-    } catch (error) {
-      console.error("Error toggling follow:", error)
+      );
+    } else {
+      toast.warn("Failed to toggle save status. Please Signin again or contact the support team ");
     }
+  } catch (err) {
+    toast.error("Error toggling saved status. Please Signin again or contact the support team");
+  }
+};
+
+
+const handleToggleFollow = async (authorUsername, postId) => {
+  if (!checkTokenValidity()) return;
+
+  const jwtToken = localStorage.getItem("jwtToken");
+  if (!jwtToken) {
+    toast.error("JWT token missing. Please sign in again.");
+    return;
   }
 
-  const handleLikeToggle = async (postId) => {
-    if (!checkTokenValidity()) return;
-
-    try {
-      const username = localStorage.getItem("username")
-      const mode = profileMode
-      if (!username || !postId || !mode) {
-        console.warn("Missing username, postId, or mode")
-        return
+  try {
+    const response = await axios.post(
+      `${APIURL}/ff/toggle-follow`,
+      { targetUsername: authorUsername },
+      {
+        headers: {
+          Authorization: `Bearer ${jwtToken}`,
+        },
       }
-      const response = await axios.post(`${APIURL}/likeunlike/toggle-like`, {
-        postId,
-        username,
-        mode,
-      })
-      if (response.status === 200) {
-        const { isLiked } = response.data
-        setPosts((prevPosts) =>
-          prevPosts.map((post) =>
-            post.postId === postId
-              ? {
-                  ...post,
-                  isLiked,
-                  numberOfLikes: isLiked ? post.numberOfLikes + 1 : post.numberOfLikes - 1,
-                }
-              : post,
-          ),
+    );
+
+    if (response.status === 200) {
+      const updatedPosts = posts.map((post) =>
+        post.postId === postId ? { ...post, isFollowing: response.data.isFollowing } : post
+      );
+      setPosts(updatedPosts);
+    }
+  } catch (error) {
+    toast.error("Error toggling follow. Please Signin again or contact the support team");
+  }
+};
+
+
+ const handleLikeToggle = async (postId) => {
+  if (!checkTokenValidity()) return;
+
+  try {
+    const jwtToken = localStorage.getItem("jwtToken");
+    const mode = profileMode;
+
+    if (!jwtToken || !postId || !mode) {
+      toast.warn("Missing jwtToken, postId, or mode , Sign in again");
+      return;
+    }
+
+    const response = await axios.post(
+      `${APIURL}/likeunlike/toggle-like`,
+      { postId, mode },
+      {
+        headers: {
+          Authorization: `Bearer ${jwtToken}`,
+        },
+      }
+    );
+
+    if (response.status === 200) {
+      const { isLiked } = response.data;
+      setPosts((prevPosts) =>
+        prevPosts.map((post) =>
+          post.postId === postId
+            ? {
+                ...post,
+                isLiked,
+                numberOfLikes: isLiked ? post.numberOfLikes + 1 : post.numberOfLikes - 1,
+              }
+            : post
         )
-      }
-    } catch (error) {
-      console.error("Error toggling like:", error)
+      );
     }
+  } catch (error) {
+    toast.error("Error toggling like. Please signin again or contact the support team");
   }
+};
+
 
   const handleVote = async (selectedOption, postId) => {
     if (!checkTokenValidity()) return;
@@ -136,10 +164,9 @@ export default function FeedPage() {
           }),
         )
       } else {
-        toast.error(data.message || "Vote failed")
+        toast.error(data.message || "Vote failed. Please sign in again or contact the support team.")
       }
     } catch (err) {
-      console.error(err)
       toast.error("Something went wrong")
     }
   }
@@ -170,12 +197,11 @@ export default function FeedPage() {
       const data = await response.json()
       if (response.ok && data.success) {
         setPosts(data.posts)
-        console.log(data.posts)
       } else {
-        console.error(data.message || "Failed to fetch social posts")
+        toast.error(data.message || "Failed to fetch social posts")
       }
     } catch (err) {
-      console.error("Error fetching social posts:", err)
+toast.error("Error fetching social posts")
     } finally {
       setLoading(false)
     }
@@ -200,12 +226,11 @@ export default function FeedPage() {
       const data = await response.json()
       if (response.ok && data.success) {
         setPosts(data.posts)
-        console.log(data.posts)
       } else {
-        console.error(data.message || "Failed to fetch professional posts")
+        toast.error(data.message || "Failed to fetch professional posts")
       }
     } catch (error) {
-      console.error("Error fetching professional posts:", error)
+toast.error("Error fetching professional posts")
     } finally {
       setLoading(false)
     }

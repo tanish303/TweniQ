@@ -1,16 +1,33 @@
 const express = require('express');
 const router = express.Router();
-const User = require('../Models/User'); // Adjust path as needed
+const jwt = require('jsonwebtoken');
+const User = require('../Models/User');
+const { JWT_SECRET } = process.env;
 
 router.post('/toggle-follow', async (req, res) => {
-  const { targetUsername, currentUsername } = req.body;
+  const { targetUsername } = req.body;
 
-  if (!targetUsername || !currentUsername) {
-    return res.status(400).json({ success: false, message: "Both usernames must be provided" });
+  // 🔐 Extract token
+  const token = req.headers.authorization?.split(" ")[1];
+  if (!token) {
+    return res.status(401).json({ success: false, message: "Authorization token missing" });
+  }
+
+  let decoded;
+  try {
+    decoded = jwt.verify(token, JWT_SECRET);
+  } catch (err) {
+    return res.status(403).json({ success: false, message: "Invalid or expired token" });
+  }
+
+  const currentUserId = decoded.userId;
+
+  if (!targetUsername || !currentUserId) {
+    return res.status(400).json({ success: false, message: "targetUsername and token user required" });
   }
 
   try {
-    const currentUser = await User.findOne({ username: currentUsername });
+    const currentUser = await User.findById(currentUserId);
     const targetUser = await User.findOne({ username: targetUsername });
 
     if (!currentUser || !targetUser) {
@@ -61,7 +78,7 @@ router.post('/toggle-follow', async (req, res) => {
 
   } catch (error) {
     console.error("Error in toggle-follow route:", error);
-    return res.status(500).json({ success: false, message: "An error occurred while toggling follow status" });
+    return res.status(500).json({ success: false, message: "Server error" });
   }
 });
 

@@ -38,16 +38,10 @@ function App() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/signin" element={<Signin />} />
           <Route path="/resetPassword" element={<ResetPassword />} />
+          <Route path="/setupprofile" element={  <Setupprofile />} />
 
           {/* ---------- Protected Stand‑Alone Routes ---------- */}
-          <Route
-  path="/setupprofile"
-  element={
-    <ProtectedRoute>
-      <Setupprofile />
-    </ProtectedRoute>
-  }
-/>
+     
           <Route
             path="/commentsection"
             element={

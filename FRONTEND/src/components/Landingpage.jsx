@@ -19,13 +19,13 @@ const Landingpage = () => {
       const { exp } = jwtDecode(token)
       const isExpired = Date.now() >= exp * 1000
       if (!isExpired) {
-        navigate("/pages/home")  // 🔁 Redirect logged-in users
+        navigate("/pages/home") 
       } else {
-        localStorage.removeItem("jwtToken")  // 🔒 Remove expired token
-        alert("Your session has expired. Please sign in again.")  // 🚨 Notify user
+        localStorage.removeItem("jwtToken")  
+        alert("Your session has expired. Please sign in again.") 
       }
     } catch (err) {
-      localStorage.removeItem("jwtToken") // 🛑 Invalid token
+      localStorage.removeItem("jwtToken") 
     }
   }
 }, [])
@@ -160,13 +160,13 @@ For the You… and the You        </p>
             className="group relative px-10 py-4 bg-gradient-to-r from-blue-600/90 to-purple-600/90 
                        backdrop-blur-sm border border-white/25 rounded-2xl text-white font-semibold 
                        text-lg transition-all duration-300 hover:scale-105 hover:shadow-2xl 
-                       hover:from-blue-500 hover:to-purple-500 overflow-hidden"
+                       hover:from-blue-500 hover:to-purple-500 overflow-hidden hover:cursor-pointer"
           >
             <span
               className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-purple-400/20 
                              opacity-0 group-hover:opacity-100 transition-opacity blur-xl"
             ></span>
-            <div className="relative flex items-center gap-3">
+            <div className="relative flex items-center gap-3 ">
               <span>Get Started</span>
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </div>
@@ -176,7 +176,7 @@ For the You… and the You        </p>
             onClick={() => navigate("/signin")}
             className="group relative px-10 py-4 bg-white/12 backdrop-blur-md border border-white/30 
                        rounded-2xl text-white font-semibold text-lg transition-all duration-300 
-                       hover:scale-105 hover:bg-white/20 hover:shadow-2xl overflow-hidden"
+                       hover:scale-105 hover:bg-white/20 hover:shadow-2xl overflow-hidden hover:cursor-pointer"
           >
             <span
               className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 

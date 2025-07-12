@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import SocioFusion from "./SocioFusion";
+import Tweniq from "./Tweniq";
 import { useApp } from "../context/AppContext"; 
 
 
@@ -41,11 +41,9 @@ const handleSubmit = async (e) => {
     if (response.status === 200) {
       const { jwtToken, username } = response.data;
 
-      // Save jwtToken and username separately in localStorage
       localStorage.setItem("jwtToken", jwtToken);
       localStorage.setItem("username", username);
 
-      // Set username as globalusername
       setglobalusername(username);
 
       console.log("JWT Token:", localStorage.getItem("jwtToken"));
@@ -69,18 +67,15 @@ const handleSubmit = async (e) => {
       <div className="relative w-full max-w-md">
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-4 py-2 mb-4">
-            <div className="w-6 h-6 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full flex items-center justify-center">
-              <span className="text-white text-sm font-bold">S</span>
-            </div>
+          
 <div className="flex items-center text-in font-bold">
   <span className="text-white mr-2">Welcome to</span>
-        <SocioFusion />
+        <Tweniq />
 
 </div>
 
           </div>
-          <h1 className="text-3xl font-bold text-white mb-2">Sign In</h1>
-          <p className="text-purple-100">Enter your credentials to continue</p>
+          
         </div>
 
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden">

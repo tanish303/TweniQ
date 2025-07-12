@@ -145,7 +145,7 @@ export default function ViewPersonalStats() {
         {/* Back Button */}
         <motion.button
           onClick={() => navigate(-1)}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:cursor-pointer${
             isProfessional
               ? "text-slate-600 hover:text-slate-800 hover:bg-slate-100"
               : "text-purple-600 hover:text-purple-800 hover:bg-purple-100"
@@ -160,16 +160,7 @@ export default function ViewPersonalStats() {
 
         {/* Header */}
         <motion.div className="text-center mb-8" initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
-          <div
-            className={`inline-flex items-center gap-2 px-4 py-2 rounded-full mb-4 ${
-              isProfessional
-                ? "bg-gradient-to-r from-slate-100 to-blue-100 text-slate-700"
-                : "bg-gradient-to-r from-pink-100 to-purple-100 text-purple-700"
-            }`}
-          >
-            <IconComponent className="w-4 h-4" />
-            <span className="font-medium text-sm">{category}</span>
-          </div>
+          
 
           <h1
             className={`text-3xl font-bold mb-2 ${
@@ -361,64 +352,7 @@ export default function ViewPersonalStats() {
         )}
       </div>
 
-      {/* Background Decorations */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
-        {isProfessional ? (
-          <>
-            <motion.div
-              className="absolute top-32 right-32 w-28 h-28 bg-blue-200/10 rounded-full blur-xl"
-              animate={{
-                scale: [1, 1.05, 1],
-                x: [0, 10, 0],
-              }}
-              transition={{
-                duration: 25,
-                repeat: Number.POSITIVE_INFINITY,
-                ease: "easeInOut",
-              }}
-            />
-            <motion.div
-              className="absolute bottom-32 left-32 w-20 h-20 bg-slate-300/8 rounded-full blur-lg"
-              animate={{
-                scale: [1.05, 1, 1.05],
-                rotate: [0, 45, 90],
-              }}
-              transition={{
-                duration: 30,
-                repeat: Number.POSITIVE_INFINITY,
-                ease: "linear",
-              }}
-            />
-          </>
-        ) : (
-          <>
-            <motion.div
-              className="absolute top-20 left-20 w-32 h-32 bg-pink-300/15 rounded-full blur-2xl"
-              animate={{
-                scale: [1, 1.1, 1],
-                rotate: [0, 90, 180],
-              }}
-              transition={{
-                duration: 20,
-                repeat: Number.POSITIVE_INFINITY,
-                ease: "linear",
-              }}
-            />
-            <motion.div
-              className="absolute bottom-20 right-40 w-24 h-24 bg-purple-300/20 rounded-full blur-xl"
-              animate={{
-                scale: [1.1, 1, 1.1],
-                rotate: [180, 90, 0],
-              }}
-              transition={{
-                duration: 15,
-                repeat: Number.POSITIVE_INFINITY,
-                ease: "linear",
-              }}
-            />
-          </>
-        )}
-      </div>
+     
     </div>
   )
 }

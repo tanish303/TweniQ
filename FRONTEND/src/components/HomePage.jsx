@@ -58,7 +58,6 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4">
-      {/* Hero Section - Smaller */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -82,7 +81,7 @@ export default function HomePage() {
               : "bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent"
           }`}
         >
-          SocioFusion
+          TweniQ
         </h1>
         <p className={`text-base max-w-lg mx-auto ${isProfessional ? "text-slate-600" : "text-gray-600"}`}>
           {isProfessional
@@ -91,7 +90,6 @@ export default function HomePage() {
         </p>
       </motion.div>
 
-      {/* Navigation Cards - Smaller */}
       <div className="grid md:grid-cols-2 gap-4 max-w-3xl w-full">
         {navigationCards.map((card, index) => {
           const Icon = card.icon
@@ -139,7 +137,6 @@ export default function HomePage() {
         })}
       </div>
 
-      {/* Floating Elements for Better Look */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
         {!isProfessional ? (
           <>

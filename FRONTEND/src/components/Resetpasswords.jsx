@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom"
 import axios from "axios"
 import { toast } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
-import SocioFusion from "./SocioFusion";
+import Tweniq from "./Tweniq";
 
 const ResetPassword = () => {
   const navigate = useNavigate()
@@ -117,19 +117,17 @@ const ResetPassword = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-300 via-indigo-400 to-indigo-100 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        {/* Header */}
+        
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full mb-4">
             <div className="w-2 h-2 bg-white rounded-full"></div>
-        <SocioFusion />
+        <Tweniq />
           </div>
           <h1 className="text-3xl font-bold text-white mb-2">{getStepInfo().title}</h1>
           <p className="text-indigo-100">{getStepInfo().desc}</p>
         </div>
 
-        {/* Main Card */}
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-          {/* indigo Header */}
           <div className="bg-gradient-to-r from-indigo-600 to-indigo-700 px-6 py-4">
             <h2 className="text-xl font-bold text-white">Step {step} of 3</h2>
             <div className="flex mt-2 space-x-1">
@@ -139,7 +137,6 @@ const ResetPassword = () => {
             </div>
           </div>
 
-          {/* Form Content */}
           <div className="p-6">
             {step === 1 && (
               <form onSubmit={handleSendOTP} className="space-y-4">
@@ -245,7 +242,7 @@ onClick={() => {
         <div className="text-center mt-6">
           <button
             onClick={() => navigate("/signin")}
-            className="text-white/80 hover:text-white text-sm font-medium transition-colors"
+            className="text-white/80 hover:text-white text-sm font-medium transition-colors hover:cursor-pointer"
           >
             ← Back to Sign In
           </button>

@@ -10,38 +10,32 @@ router.post("/", async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    // Validate input
     if (!email || !password) {
       return res.status(400).json({ message: "Email and password are required" });
     }
 
-    // Check email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return res.status(400).json({ message: "Invalid email format" });
     }
 
-    // Check if user exists
 const user = await User.findOne({ email: new RegExp(`^${email}$`, "i") });
     if (!user) {
       return res.status(404).json({ message: "User with this email does not exist" });
     }
 
-    // Compare passwords
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       return res.status(401).json({ message: "Password is incorrect for this email" });
     }
 
-    // Generate JWT
         const token = jwt.sign(
           { userId: user._id },
           process.env.JWT_SECRET,
-            { expiresIn: "7d" }  // ⏳ Token expires in 7 days
+            { expiresIn: "7d" } 
 
         );
 
-    // Respond with token and username
     res.status(200).json({ jwtToken: token, username: user.username });
   } catch (error) {
     console.error("Error during sign-in:", error);

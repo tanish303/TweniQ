@@ -1,20 +1,37 @@
 const express = require('express');
+const jwt = require('jsonwebtoken');
 const router = express.Router();
+
 const User = require('../Models/User');
+const ProfessionalPost = require('../Models/ProfessionalPost');
 const SocialPost = require('../Models/SocialPost');
-const ProfessionalPost = require('../Models/ProfessionalPost'); // ✅ Required for professional mode
+const { JWT_SECRET } = process.env;
 
-
-
+// POST /likeunlike/toggle-like
 router.post('/toggle-like', async (req, res) => {
-  const { postId, username, mode } = req.body;
+  const { postId, mode } = req.body;
 
-  if (!postId || !username || !mode) {
-    return res.status(400).json({ success: false, message: "postId, username, and mode are required" });
+  // ✅ Extract token
+  const token = req.headers.authorization?.split(" ")[1];
+  if (!token) {
+    return res.status(401).json({ success: false, message: "Authorization token missing" });
+  }
+
+  // ✅ Verify token
+  let decoded;
+  try {
+    decoded = jwt.verify(token, JWT_SECRET);
+  } catch (err) {
+    return res.status(403).json({ success: false, message: "Invalid or expired token" });
+  }
+
+  const userId = decoded.userId;
+  if (!postId || !userId || !mode) {
+    return res.status(400).json({ success: false, message: "postId, userId, and mode are required" });
   }
 
   try {
-    const user = await User.findOne({ username });
+    const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ success: false, message: "User not found" });
     }
@@ -26,8 +43,6 @@ router.post('/toggle-like', async (req, res) => {
     }
 
     const alreadyLiked = post.likes.includes(user._id);
-
-    // Choose the correct profile path for likedPosts
     const profilePath = mode === 'professional' ? 'professionalProfile.likedPosts' : 'socialProfile.likedPosts';
 
     if (alreadyLiked) {
@@ -43,15 +58,15 @@ router.post('/toggle-like', async (req, res) => {
     user.markModified(profilePath);
     await user.save();
 
-    return res.status(200).json({ success: true, isLiked: !alreadyLiked, message: alreadyLiked ? "Unliked" : "Liked" });
-
+    return res.status(200).json({
+      success: true,
+      isLiked: !alreadyLiked,
+      message: alreadyLiked ? "Unliked" : "Liked",
+    });
   } catch (error) {
     console.error("Error in toggle-like route:", error);
     return res.status(500).json({ success: false, message: "Server error" });
   }
 });
-
-module.exports = router;
-
 
 module.exports = router;

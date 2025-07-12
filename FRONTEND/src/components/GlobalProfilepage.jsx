@@ -34,7 +34,7 @@ export default function GlobalProfilepage() {
         },
       )
     } catch (err) {
-      console.error("Error toggling follow:", err)
+      alert("Something went wrong. Please contact the support team.")
       setIsFollowing((prev) => !prev)
       setFollowerCount((prev) => (isFollowing ? prev + 1 : prev - 1))
     }
@@ -54,7 +54,6 @@ export default function GlobalProfilepage() {
         setIsFollowing(data.isFollow || false)
         setFollowerCount(data.followers || 0)
       } catch (err) {
-        console.error("❌ Profile fetch failed:", err)
         setError("Failed to load profile. Please try again later.")
       } finally {
         setLoading(false)
@@ -126,18 +125,16 @@ export default function GlobalProfilepage() {
   return (
     <div className="h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 p-4 overflow-hidden">
       <div className="max-w-4xl mx-auto h-full flex flex-col">
-        {/* Back Button */}
         <motion.button
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           onClick={() => navigate(-1)}
-          className="mb-4 flex items-center gap-2 text-gray-600 hover:text-purple-600 transition-all duration-200 bg-white/70 backdrop-blur-sm px-3 py-1.5 rounded-lg shadow-md hover:shadow-lg w-fit text-sm"
+          className="mb-4 flex items-center gap-2 text-gray-600 hover:text-purple-600 transition-all duration-200 bg-white/70 backdrop-blur-sm px-3 py-1.5 rounded-lg shadow-md hover:shadow-lg w-fit text-sm cursor-pointer"
         >
           <ArrowLeft className=" h-3" />
           <span className="font-medium">Back</span>
         </motion.button>
 
-        {/* Main Content - Single Card */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

@@ -5,14 +5,13 @@ import { useNavigate } from 'react-router-dom';
 import { 
   Mail, 
   ArrowLeft, 
-  Send, 
-  CheckCircle, 
+ 
   Sparkles
 } from "lucide-react";
 
 const AppName = import.meta.env.VITE_APP_NAME;
 const APIURL = import.meta.env.VITE_API_BASE_URL;
-import SocioFusion from "./SocioFusion";
+import Tweniq from "./Tweniq";
 
 const Signup = () => {  
   const navigate = useNavigate();
@@ -50,7 +49,6 @@ const Signup = () => {
         toast.error(errorData.message || "Something went wrong.");
       }
     } catch (error) {
-      console.log(error);
       toast.error("Server error. Please try again later.");
     } finally {
       setIsSendingOtp(false);
@@ -105,7 +103,7 @@ const Signup = () => {
         <div className="text-center mb-6">
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-indigo-100 rounded-full mb-4">
             <Sparkles className="w-4 h-4 text-indigo-600" />
-            <span className="text-sm text-indigo-800 font-semibold flex gap-1">Join <SocioFusion/></span>
+            <span className="text-sm text-indigo-800 font-semibold flex gap-1">Join <Tweniq/></span>
           </div>
           <h1 className="text-2xl font-bold text-gray-900">Create Account</h1>
           <p className="text-sm text-gray-600">Enter your email to get started</p>
