@@ -22,8 +22,6 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// ✅ Serve uploaded images publicly
-app.use("/uploads", express.static("uploads"));
 
 app.use("/signup",       Signup);
 app.use("/signin",       Signin);
@@ -39,7 +37,6 @@ app.use("/account",      AccountInfo);
 app.use("/chat",         Chat);
 app.use("/showuser",         GlobalUserData);
 
-/* ---------- Create HTTP server & attach Socket.IO ---------- */
 const server = http.createServer(app);
 require("./socket")(server);
 

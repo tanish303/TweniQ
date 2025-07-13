@@ -5,23 +5,12 @@ const crypto = require("crypto");
 const User = require("../Models/User");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const multer = require("multer");
-const path = require("path");
 
 
-// Setup multer storage
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "uploads/"); // Ensure this exists
-  },
-  filename: function (req, file, cb) {
-    const ext = path.extname(file.originalname);
-    const uniqueName = Date.now() + "-" + Math.round(Math.random() * 1e9) + ext;
-    cb(null, uniqueName);
-  },
-});
 
-const upload = multer({ storage });
+const upload = require("../config/multerConfig"); // ✅ Import cloudinary multer config
+
+
 
 // For sending otp 
 
@@ -65,11 +54,22 @@ router.post("/sendotp", async (req, res) => {
       },
     });
 
-    await transporter.sendMail({
-      to: email,
-      subject: "Your OTP Code",
-      text: `Your OTP for verification is: ${otp}`,
-    });
+  await transporter.sendMail({
+  from: `"TweniQ" <tweniq@gmail.com>`, // ✅ Capitalized name shown to user
+  to: email,
+  subject: "Verify Your Email",
+  text: `Hi there!
+
+To continue with your registration, please verify your email using the OTP below:
+
+🔐 Your One-Time Password (OTP): ${otp}
+
+If you didn’t request this, you can safely ignore this email.
+
+Thanks,  
+The TweniQ Team`,
+});
+
 
     res.status(200).json({ message: "OTP sent to your email" });
   } catch (error) {
@@ -146,71 +146,64 @@ router.get("/usernameavailability", async (req, res) => {
 });
 
 
-router.post("/saveprofiledata", upload.fields([
-  { name: "socialDp", maxCount: 1 },
-  { name: "professionalDp", maxCount: 1 },
-]), async (req, res) => {
-  try {
-    const {
-      email,
-      username,
-      password,
-      socialProfile,
-      professionalProfile,
-    } = req.body;
 
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
+router.post(
+  "/saveprofiledata",
+  upload.fields([
+    { name: "socialDp", maxCount: 1 },
+    { name: "professionalDp", maxCount: 1 },
+  ]),
+  async (req, res) => {
+    try {
+      const { email, username, password, socialProfile, professionalProfile } = req.body;
+
+      const user = await User.findOne({ email });
+      if (!user) return res.status(404).json({ message: "User not found" });
+
+      user.username = username || user.username;
+
+      if (password) {
+        const hashedPassword = await bcrypt.hash(password, 10);
+        user.password = hashedPassword;
+      }
+
+      const parsedSocial = JSON.parse(socialProfile);
+      const parsedProfessional = JSON.parse(professionalProfile);
+
+      user.socialProfile = {
+        ...user.socialProfile,
+        ...parsedSocial,
+        dpUrl: req.files?.socialDp?.[0]
+          ? req.files.socialDp[0].path // ✅ Cloudinary path
+          : user.socialProfile.dpUrl,
+      };
+
+      user.professionalProfile = {
+        ...user.professionalProfile,
+        ...parsedProfessional,
+        dpUrl: req.files?.professionalDp?.[0]
+          ? req.files.professionalDp[0].path // ✅ Cloudinary path
+          : user.professionalProfile.dpUrl,
+      };
+
+      await user.save();
+
+      const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
+        expiresIn: "7d",
+      });
+
+      return res.status(200).json({
+        message: "Profile updated successfully",
+        jwtToken: token,
+        username: user.username,
+      });
+    } catch (error) {
+      console.error("Error updating user profile:", error);
+      return res.status(500).json({ message: "An error occurred", error });
     }
-
-    user.username = username || user.username;
-
-    // Hash password if provided
-    if (password) {
-      const hashedPassword = await bcrypt.hash(password, 10);
-      user.password = hashedPassword;
-    }
-
-    // Parse JSON fields from FormData strings
-    const parsedSocial = JSON.parse(socialProfile);
-    const parsedProfessional = JSON.parse(professionalProfile);
-
-    user.socialProfile = {
-      ...user.socialProfile,
-      ...parsedSocial,
-      dpUrl: req.files?.socialDp?.[0]
-        ? `/uploads/${req.files.socialDp[0].filename}`
-        : user.socialProfile.dpUrl,
-    };
-
-    user.professionalProfile = {
-      ...user.professionalProfile,
-      ...parsedProfessional,
-      dpUrl: req.files?.professionalDp?.[0]
-        ? `/uploads/${req.files.professionalDp[0].filename}`
-        : user.professionalProfile.dpUrl,
-    };
-
-    await user.save();
-
-    const token = jwt.sign(
-      { userId: user._id },
-      process.env.JWT_SECRET,
-        { expiresIn: "7d" }  // or "15m", "1h", "30d"
-
-    );
-
-    return res.status(200).json({
-      message: "Profile updated successfully",
-      jwtToken: token,
-      username: user.username,
-    });
-  } catch (error) {
-    console.error("Error updating user profile:", error);
-    return res.status(500).json({ message: "An error occurred", error });
   }
-});
+);
+
 
 
 

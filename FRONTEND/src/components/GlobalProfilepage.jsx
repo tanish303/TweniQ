@@ -227,7 +227,7 @@ export default function GlobalProfilepage() {
                   <div className="relative flex-shrink-0">
                     {socialDpUrl ? (
                       <img
-                        src={`${APIURL}${socialDpUrl}`}
+                        src={`${socialDpUrl}`}
                         alt="Social DP"
                         className="h-10 w-10 rounded-lg object-cover shadow-sm ring-2 ring-pink-200/50"
                       />
@@ -291,7 +291,7 @@ export default function GlobalProfilepage() {
                   <div className="relative flex-shrink-0">
                     {professionalDpUrl ? (
                       <img
-                        src={`${APIURL}${professionalDpUrl}`}
+                        src={`${professionalDpUrl}`}
                         alt="Professional DP"
                         className="h-10 w-10 rounded-lg object-cover shadow-sm ring-2 ring-blue-200/50"
                       />

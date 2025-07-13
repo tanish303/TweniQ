@@ -41,12 +41,21 @@ router.post("/sendotp", async (req, res) => {
         pass: process.env.EMAIL_PASS,
       },
     })
+await transporter.sendMail({
+  from: `"TweniQ" <tweniq@gmail.com>`, // ✅ Display name + email
+  to: email,
+  subject: "Password Reset Request",
+  text: `Hi,
 
-    await transporter.sendMail({
-      to: email,
-      subject: "Password Reset OTP",
-      text: `Your OTP for Password Reset is: ${otp}. This OTP will expire in 10 minutes.`,
-    })
+We received a request to reset your password. Use the OTP below to proceed:
+
+🔐 OTP for Password Reset: ${otp}
+
+If you didn't request a password reset, please ignore this email.
+
+– The TweniQ Team`,
+});
+
 
     res.status(200).json({ message: "OTP sent to your email" })
   } catch (error) {

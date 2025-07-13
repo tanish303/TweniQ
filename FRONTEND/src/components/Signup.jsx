@@ -115,7 +115,8 @@ const Signup = () => {
             <p className="text-sm text-indigo-100">We'll send you a verification code</p>
           </div>
 
-          <form className="p-4 space-y-4">
+          <form className="p-4 space-y-4"   onSubmit={(e) => e.preventDefault()} 
+>
             <div>
               <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
                 <Mail className="w-4 h-4 text-indigo-600" />
@@ -125,6 +126,7 @@ const Signup = () => {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+
                 placeholder="Enter your email"
                 className={`w-full px-3 py-2 text-sm text-gray-900 bg-white border rounded-lg ${
                   isValidEmail ? "border-gray-300" : "border-red-300 bg-red-50"
@@ -138,6 +140,7 @@ const Signup = () => {
               type="button"
               onClick={handlesendotp}
               disabled={isSendingOtp}
+
               className="w-full bg-indigo-400 hover:bg-indigo-500 text-white font-semibold py-3 rounded-lg"
             >
               {isSendingOtp ? "Sending OTP..." : otpSent ? "Resend OTP" : "Send OTP"}

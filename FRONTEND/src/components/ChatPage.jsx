@@ -244,7 +244,7 @@ export default function ChatPage() {
                   {/* Compact DP Image */}
                   {searchResult.dpUrl ? (
                     <img
-                      src={`${API}${searchResult.dpUrl}`}
+                      src={`${searchResult.dpUrl}`}
                       alt={searchResult.username}
                       className="w-12 h-12 rounded-full object-cover object-center shadow-sm flex-shrink-0"
                     />
@@ -369,7 +369,7 @@ export default function ChatPage() {
                       <div className="flex items-center gap-3">
                         {c.dpUrl ? (
                           <img
-                            src={`${API}${c.dpUrl}`}
+                            src={`${c.dpUrl}`}
                             alt={c.username}
                             className="w-10 h-10 rounded-full object-cover object-center shadow-sm flex-shrink-0"
                           />

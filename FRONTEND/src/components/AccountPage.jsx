@@ -54,7 +54,7 @@ export default function AccountPage() {
   }
 
   const rawDpPath = isProfessional ? overview.professionalDpUrl : overview.socialDpUrl
-const dpUrl = rawDpPath ? `${APIURL}${rawDpPath}` : null;
+const dpUrl = rawDpPath ? `${rawDpPath}` : null;
 
   const actionButtons = [
     {

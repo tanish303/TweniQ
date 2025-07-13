@@ -156,7 +156,7 @@ const CommentSection = () => {
                     <div className="flex-shrink-0 w-10 h-10 rounded-full overflow-hidden shadow-md">
   {comment.dpUrl ? (
     <img
-      src={`${APIURL}${comment.dpUrl}`}           
+      src={`${comment.dpUrl}`}           
       alt={comment.displayName}
       className="w-full h-full object-cover object-center"
     />

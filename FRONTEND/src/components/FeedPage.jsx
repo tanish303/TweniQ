@@ -324,7 +324,7 @@ toast.error("Error fetching professional posts")
                         <div className="w-10 h-10 rounded-full overflow-hidden shadow-sm">
                           {post.authorDpUrl ? (
                             <img
-                              src={`${APIURL}${post.authorDpUrl}`}
+                              src={`${post.authorDpUrl}`}
                               alt={post.authorUsername}
                               className="w-full h-full object-cover object-center"
                             />
