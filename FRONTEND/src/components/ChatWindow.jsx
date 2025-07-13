@@ -109,33 +109,31 @@ export default function ChatWindow() {
   }, [roomId])
 
   // Real-time listener
-  useEffect(() => {
-    const listener = (m) => {
-      if (m.room === roomId) setMsgs((prev) => [...prev, m])
+useEffect(() => {
+  const listener = (m) => {
+    if (m.room === roomId) {
+      setMsgs((prev) => {
+        const alreadyExists = prev.some((msg) => msg._id === m._id);
+        if (alreadyExists) return prev;
+        return [...prev, m];
+      });
     }
-    socket.on("chat:receive", listener)
-    return () => socket.off("chat:receive", listener)
-  }, [roomId])
+  };
+  socket.on("chat:receive", listener);
+  return () => socket.off("chat:receive", listener);
+}, [roomId]);
+useEffect(() => {
+  if (!roomId) return
+  socket.emit("chat:join", roomId)
+}, [roomId])
+
 
 const send = () => {
   if (!text.trim()) return;
-
-  const msg = {
-    _id: `${Date.now()}`, // temporary ID (can be anything unique)
-    text,
-    createdAt: new Date().toISOString(),
-    sender: myId,
-    room: roomId,
-  };
-
-  // Add own message manually
-  setMsgs((prev) => [...prev, msg]);
-
-  // Emit message to server (no need for acknowledgment here)
   socket.emit("chat:send", { roomId, text });
-
   setText("");
 };
+
 
 
   return (

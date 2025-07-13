@@ -87,27 +87,43 @@ router.get("/conversations", async (req, res) => {
       mode,
     })
       .populate("participants", "username professionalProfile.name professionalProfile.dpUrl socialProfile.name socialProfile.dpUrl")
-      .sort({ updatedAt: -1 })
       .lean();
 
-    const conv = rooms.map((r) => {
-      const other = r.participants.find((u) => u._id.toString() !== userId);
-      const profile = other?.[`${mode}Profile`] || {};
+    // Get the latest message for each room
+    const conversations = await Promise.all(
+      rooms.map(async (room) => {
+        const other = room.participants.find((u) => u._id.toString() !== userId);
+        const profile = other?.[`${mode}Profile`] || {};
 
-      return {
-        roomId: r._id,
-        username: other?.username || "Unknown",
-        name: profile.name || "Unnamed",
-        dpUrl: profile.dpUrl || null,
-      };
+        const latestMessage = await Message.findOne({ room: room._id })
+          .sort({ createdAt: -1 })
+          .select("createdAt text")
+          .lean();
+
+        return {
+          roomId: room._id,
+          username: other?.username || "Unknown",
+          name: profile.name || "Unnamed",
+          dpUrl: profile.dpUrl || null,
+          latestMessage,
+        };
+      })
+    );
+
+    // Sort conversations by latest message time
+    conversations.sort((a, b) => {
+      const aTime = a.latestMessage?.createdAt ? new Date(a.latestMessage.createdAt) : 0;
+      const bTime = b.latestMessage?.createdAt ? new Date(b.latestMessage.createdAt) : 0;
+      return bTime - aTime;
     });
 
-    res.json({ conversations: conv });
+    res.json({ conversations });
   } catch (err) {
     console.error("Error fetching conversations:", err);
     res.status(500).json({ message: "Server error" });
   }
 });
+
 
 
 /* 📜 Get messages of a room */

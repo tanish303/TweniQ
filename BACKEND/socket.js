@@ -31,6 +31,10 @@ module.exports = (httpServer) => {
     } catch (err) {
       console.error("❌ Could not join rooms:", err);
     }
+socket.on("chat:join", (roomId) => {
+  console.log(`User ${socket.userId} joined room ${roomId}`);
+  socket.join(roomId);
+});
 
     // 4. Listen for incoming messages from this socket
     socket.on("chat:send", async ({ roomId, text }) => {
