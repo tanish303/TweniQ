@@ -1,4 +1,5 @@
 "use client"
+
 import { motion } from "framer-motion"
 import { PlusCircle, MessageCircle, User, Sparkles, TrendingUp, Users, Zap, ArrowRight } from "lucide-react"
 import { useNavigate } from "react-router-dom"
@@ -57,25 +58,27 @@ export default function HomePage() {
   ]
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4">
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 pb-28 md:pb-4">
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="text-center mb-8"
+        className="text-center mb-6 md:mb-8"
       >
         <div
-          className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-3 ${
+          className={`inline-flex items-center gap-2 px-4 py-2 md:px-3 md:py-1.5 rounded-full mb-4 md:mb-3 ${
             isProfessional
               ? "bg-gradient-to-r from-slate-100 to-blue-100 text-slate-700"
               : "bg-gradient-to-r from-pink-100 to-purple-100 text-purple-700"
           }`}
         >
-          <Zap className="w-3 h-3" />
-          <span className="font-medium text-xs">Welcome to {isProfessional ? "Professional" : "Social"} Mode</span>
+          <Zap className="w-4 h-4 md:w-3 md:h-3" />
+          <span className="font-medium text-sm md:text-xs">
+            Welcome to {isProfessional ? "Professional" : "Social"} Mode
+          </span>
         </div>
         <h1
-          className={`text-3xl font-bold mb-2 ${
+          className={`text-4xl md:text-3xl font-bold mb-3 md:mb-2 ${
             isProfessional
               ? "text-slate-800"
               : "bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent"
@@ -83,14 +86,16 @@ export default function HomePage() {
         >
           TweniQ
         </h1>
-        <p className={`text-base max-w-lg mx-auto ${isProfessional ? "text-slate-600" : "text-gray-600"}`}>
+        <p
+          className={`text-lg md:text-base max-w-lg mx-auto px-2 ${isProfessional ? "text-slate-600" : "text-gray-600"}`}
+        >
           {isProfessional
             ? "Connect and grow your professional network with industry leaders."
             : "Share your world and connect with friends in a vibrant community."}
         </p>
       </motion.div>
 
-      <div className="grid md:grid-cols-2 gap-4 max-w-3xl w-full">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-4 max-w-3xl w-full">
         {navigationCards.map((card, index) => {
           const Icon = card.icon
           return (
@@ -101,24 +106,28 @@ export default function HomePage() {
               transition={{ delay: index * 0.1, duration: 0.4 }}
             >
               <div
-                className={`h-full cursor-pointer overflow-hidden border-0 shadow-md bg-gradient-to-br ${card.bgGradient} hover:shadow-lg transition-all duration-300 rounded-lg transform hover:scale-105`}
+                className={`h-full cursor-pointer overflow-hidden border-0 shadow-md bg-gradient-to-br ${card.bgGradient} hover:shadow-lg transition-all duration-300 rounded-xl md:rounded-lg transform hover:scale-105 active:scale-95`}
                 onClick={() => onNavigate(card.id)}
               >
-                <div className="p-5 h-full flex flex-col">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className={`p-2.5 rounded-lg bg-gradient-to-r ${card.gradient} shadow-sm`}>
-                      <Icon className="w-5 h-5 text-white" />
+                <div className="p-6 md:p-5 h-full flex flex-col">
+                  <div className="flex items-center justify-between mb-4 md:mb-3">
+                    <div
+                      className={`p-3 md:p-2.5 rounded-xl md:rounded-lg bg-gradient-to-r ${card.gradient} shadow-sm`}
+                    >
+                      <Icon className="w-6 h-6 md:w-5 md:h-5 text-white" />
                     </div>
-                    <div className={`w-1.5 h-1.5 rounded-full bg-gradient-to-r ${card.gradient}`} />
+                    <div className={`w-2 h-2 md:w-1.5 md:h-1.5 rounded-full bg-gradient-to-r ${card.gradient}`} />
                   </div>
-                  <h3 className="text-lg font-bold mb-2 text-gray-800">{card.title}</h3>
-                  <p className="text-gray-600 mb-4 flex-grow leading-relaxed text-sm">{card.description}</p>
+                  <h3 className="text-xl md:text-lg font-bold mb-3 md:mb-2 text-gray-800">{card.title}</h3>
+                  <p className="text-gray-600 mb-5 md:mb-4 flex-grow leading-relaxed text-base md:text-sm">
+                    {card.description}
+                  </p>
                   <motion.button
-                    className={`w-full py-2.5 font-semibold rounded-lg bg-gradient-to-r ${card.gradient} hover:shadow-md transition-all duration-200 text-white flex items-center justify-center gap-2 group`}
+                    className={`w-full py-3 md:py-2.5 font-semibold rounded-xl md:rounded-lg bg-gradient-to-r ${card.gradient} hover:shadow-md transition-all duration-200 text-white flex items-center justify-center gap-2 group`}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                   >
-                    <span className="text-sm">Continue</span>
+                    <span className="text-base md:text-sm">Continue</span>
                     <motion.div
                       animate={{ x: [0, 4, 0] }}
                       transition={{
@@ -127,7 +136,7 @@ export default function HomePage() {
                         ease: "easeInOut",
                       }}
                     >
-                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" />
+                      <ArrowRight className="w-5 h-5 md:w-4 md:h-4 group-hover:translate-x-1 transition-transform duration-200" />
                     </motion.div>
                   </motion.button>
                 </div>
@@ -136,6 +145,9 @@ export default function HomePage() {
           )
         })}
       </div>
+
+      {/* Enhanced Mobile-Friendly Spacing */}
+      <div className="h-8 md:h-0" />
 
       <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
         {!isProfessional ? (
@@ -153,7 +165,7 @@ export default function HomePage() {
               }}
             />
             <motion.div
-              className="absolute bottom-20 right-20 w-16 h-16 bg-purple-300/15 rounded-full blur-lg"
+              className="absolute bottom-32 md:bottom-20 right-20 w-16 h-16 bg-purple-300/15 rounded-full blur-lg"
               animate={{
                 scale: [1.2, 1, 1.2],
                 rotate: [360, 180, 0],
@@ -192,7 +204,7 @@ export default function HomePage() {
               }}
             />
             <motion.div
-              className="absolute bottom-32 left-16 w-14 h-14 bg-slate-300/6 rounded-full blur-md"
+              className="absolute bottom-40 md:bottom-32 left-16 w-14 h-14 bg-slate-300/6 rounded-full blur-md"
               animate={{
                 scale: [1.1, 1, 1.1],
                 rotate: [0, 90, 180],

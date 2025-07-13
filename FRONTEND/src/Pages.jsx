@@ -1,4 +1,5 @@
 "use client"
+
 import { useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Home, PlusCircle, MessageCircle, User, Briefcase, Heart } from "lucide-react"
@@ -53,10 +54,10 @@ export default function Pages() {
   return (
     <div className={`min-h-screen transition-all duration-500 ${themeClasses}`}>
       {/* Profile Toggle Button with Advanced Animation */}
-      <div className="fixed top-4 left-4 z-50">
+      <div className="fixed top-4 left-4 z-40 md:block">
         <motion.button
           onClick={toggleProfile}
-          className={`relative overflow-hidden px-6 py-2 rounded-xl font-semibold transition-all duration-500 shadow-lg hover:cursor-pointer ${
+          className={`relative overflow-hidden px-3 py-2 md:px-6 md:py-2 rounded-xl font-semibold transition-all duration-500 shadow-lg hover:cursor-pointer text-xs md:text-sm ${
             isProfessional
               ? "bg-gradient-to-r from-slate-700 via-blue-700 to-indigo-700 hover:from-slate-800 hover:via-blue-800 hover:to-indigo-800 text-white"
               : "bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 hover:from-pink-700 hover:via-purple-700 hover:to-indigo-700 text-white"
@@ -78,7 +79,6 @@ export default function Pages() {
             }}
             transition={{ duration: 0.6, ease: "easeInOut" }}
           />
-
           {/* Ripple Effect */}
           <motion.div
             className="absolute inset-0 rounded-xl opacity-30"
@@ -89,11 +89,10 @@ export default function Pages() {
             }}
             transition={{ duration: 0.8, ease: "easeInOut" }}
           />
-
           {/* Content Container */}
-          <div className="relative z-10 flex items-center gap-2">
+          <div className="relative z-10 flex items-center gap-1 md:gap-2">
             {/* Icon Animation */}
-            <div className="relative w-4 h-4">
+            <div className="relative w-3 h-3 md:w-4 md:h-4">
               <AnimatePresence mode="wait">
                 {isProfessional ? (
                   <motion.div
@@ -125,7 +124,7 @@ export default function Pages() {
                     }}
                     className="absolute inset-0"
                   >
-                    <Briefcase className="w-4 h-4" />
+                    <Briefcase className="w-3 h-3 md:w-4 md:h-4" />
                   </motion.div>
                 ) : (
                   <motion.div
@@ -157,12 +156,11 @@ export default function Pages() {
                     }}
                     className="absolute inset-0"
                   >
-                    <Heart className="w-4 h-4" />
+                    <Heart className="w-3 h-3 md:w-4 md:h-4" />
                   </motion.div>
                 )}
               </AnimatePresence>
             </div>
-
             {/* Text Animation */}
             <div className="relative overflow-hidden">
               <AnimatePresence mode="wait">
@@ -191,7 +189,8 @@ export default function Pages() {
                     }}
                     className="block"
                   >
-                    Professional
+                    <span className="hidden sm:inline">Professional</span>
+                    <span className="sm:hidden">Pro</span>
                   </motion.span>
                 ) : (
                   <motion.span
@@ -224,7 +223,6 @@ export default function Pages() {
               </AnimatePresence>
             </div>
           </div>
-
           {/* Shimmer Effect */}
           <motion.div
             className="absolute inset-0 -skew-x-12 opacity-0"
@@ -242,7 +240,6 @@ export default function Pages() {
               background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)",
             }}
           />
-
           {/* Pulse Ring */}
           <motion.div
             className="absolute inset-0 rounded-xl border-2 border-white/20"
@@ -260,8 +257,8 @@ export default function Pages() {
         </motion.button>
       </div>
 
-      {/* Top Navigation Bar */}
-      <div className="fixed top-4 right-4 z-40">
+      {/* Desktop Top Navigation Bar */}
+      <div className="hidden md:block fixed top-4 right-4 z-30">
         <div
           className={`px-2 py-2 backdrop-blur-xl border-0 shadow-lg rounded-lg ${
             isProfessional ? "bg-white/90 border-slate-200" : "bg-white/80 border-purple-200"
@@ -301,9 +298,55 @@ export default function Pages() {
         </div>
       </div>
 
-      {/* Home Button */}
+      {/* Mobile Bottom Navigation Bar */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 safe-area-pb">
+        <div
+          className={`backdrop-blur-xl border-t shadow-2xl ${
+            isProfessional ? "bg-white/98 border-slate-200" : "bg-white/98 border-purple-200"
+          }`}
+        >
+          <div className="flex justify-around items-center px-2 py-3">
+            {navItems.map((item) => {
+              const Icon = item.icon
+              const isActive = activeTab === item.id
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => navigateToTab(item.id)}
+                  className={`flex flex-col items-center justify-center p-2 rounded-lg transition-all duration-200 min-w-0 flex-1 ${
+                    isActive
+                      ? isProfessional
+                        ? "text-slate-700"
+                        : "text-purple-700"
+                      : "text-gray-500 hover:text-gray-700"
+                  }`}
+                >
+                  <div className="relative">
+                    <Icon className={`w-5 h-5 mb-1 ${isActive ? "scale-110" : ""} transition-transform duration-200`} />
+                    {/* Active indicator */}
+                    {isActive && (
+                      <motion.div
+                        layoutId="mobile-active-indicator"
+                        className={`absolute -top-1 left-1/2 transform -translate-x-1/2 w-1 h-1 rounded-full ${
+                          isProfessional ? "bg-slate-600" : "bg-gradient-to-r from-pink-500 to-purple-600"
+                        }`}
+                        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                      />
+                    )}
+                  </div>
+                  <span className={`text-xs font-medium truncate ${isActive ? "font-semibold" : ""}`}>
+                    {item.label}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* Desktop Home Button */}
       {activeTab !== "home" && (
-        <div className="fixed bottom-4 left-4 z-40">
+        <div className="hidden md:block fixed bottom-4 left-4 z-30">
           <button
             onClick={() => navigateToTab("home")}
             className={`w-10 h-10 rounded-full shadow-lg flex items-center justify-center ${
@@ -318,7 +361,9 @@ export default function Pages() {
       )}
 
       {/* Main Content - Rendered by React Router */}
-      <div className={`${activeTab === "home" ? "p-0" : "pt-16 px-6 pb-6"}`}>
+      <div
+        className={`${activeTab === "home" ? "p-0" : "pt-16 px-6 pb-6 md:pb-6"} ${activeTab !== "home" ? "pb-24 md:pb-6" : "pb-0 md:pb-0"}`}
+      >
         <motion.div
           key={`${activeTab}-${profileMode}`}
           initial={{ opacity: 0, y: 10 }}
@@ -330,8 +375,6 @@ export default function Pages() {
           <Outlet />
         </motion.div>
       </div>
-
-     
     </div>
   )
 }
