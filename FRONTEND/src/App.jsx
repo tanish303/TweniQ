@@ -13,7 +13,7 @@ import Landingpage from "./components/Landingpage";
 import Signup from "./components/Signup";
 import Setupprofile from "./components/Setupprofile";
 import Signin from "./components/Signin";
-import ResetPassword from "./components/ResetPasswords";
+import ResetPassword from "./components/Resetpasswords";
 import Pages from "./Pages";
 import HomePage from "./components/HomePage";
 import FeedPage from "./components/FeedPage";
