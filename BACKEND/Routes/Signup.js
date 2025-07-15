@@ -36,6 +36,9 @@ router.post("/sendotp", async (req, res) => {
     // Generate a 6-digit OTP
     const otp = crypto.randomInt(100000, 999999);
 
+    // Generate a random temporary username (only if new user is created)
+    const tempUsername = `tempuser_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
+
     // Upsert user: insert if new, or update OTP if already exists
     await User.updateOne(
       { email },
@@ -45,13 +48,13 @@ router.post("/sendotp", async (req, res) => {
           otpExpiresAt: Date.now() + 10 * 60 * 1000, // OTP expires in 10 mins
         },
         $setOnInsert: {
-          username: null, // explicitly set null for sparse index
-          password: "",   // placeholder, will be updated later
+          username: tempUsername, // ✅ unique placeholder username
+          password: "",           // placeholder password
           socialProfile: {
-            name: "placeholder", // required by schema
+            name: "placeholder",  // required field
           },
           professionalProfile: {
-            name: "placeholder", // required by schema
+            name: "placeholder",  // required field
           },
         },
       },
@@ -90,6 +93,7 @@ The TweniQ Team`,
     return res.status(500).json({ message: "Internal server error" });
   }
 });
+
 
 
 // For verifying the otp entered by user
@@ -177,6 +181,11 @@ router.post(
       const trimmedUsername = username?.trim();
 
       if (trimmedUsername && trimmedUsername !== user.username) {
+          if (trimmedUsername.startsWith("tempuser_")) {
+    return res.status(400).json({
+      message: "Invalid username. Please choose a more personal username.",
+    });
+  }
         const existingUser = await User.findOne({
           username: { $regex: `^${trimmedUsername}$`, $options: "i" },
         });

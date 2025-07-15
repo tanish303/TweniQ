@@ -22,11 +22,13 @@ router.get("/search", async (req, res) => {
   const userId = verifyToken(req);
   if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
-  const { q, mode } = req.query;            // ?q=john&mode=social
+  const { q, mode } = req.query;
   if (!q) return res.status(400).json({ message: "Search username missing" });
 
+  const trimmedQ = q.trim(); // ✅ Trim whitespace
+
   const user = await User.findOne(
-    { username: new RegExp(`^${q}$`, "i") }   // ← exact match, case-insensitive
+    { username: new RegExp(`^${trimmedQ}$`, "i") }  // exact match, case-insensitive
   ).lean();
 
   if (!user) return res.status(404).json({ message: "User not found" });
@@ -39,14 +41,15 @@ router.get("/search", async (req, res) => {
     user: {
       _id:       user._id,
       username:  user.username,
-      name:      profile.name,          // ✅ send name based on mode
-      dpUrl:     profile.dpUrl || null, // ✅ send dpUrl if present
+      name:      profile.name,
+      dpUrl:     profile.dpUrl || null,
       followers: user.followersCount,
       following: user.followingCount,
       posts:     profile.posts.length,
     },
   });
 });
+
 
 
 /* ➕ Create or fetch a DM room */
