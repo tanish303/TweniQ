@@ -12,17 +12,14 @@ import { checkTokenValidity } from "../utils/checkToken"
 
 const API = import.meta.env.VITE_API_BASE_URL
 
-// 🕒 Format time like 3:45 PM
 function formatTime(iso) {
   const date = new Date(iso)
   return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
 }
 
-// 📅 Format date line like Today / Yesterday / July 5, 2025
 function formatDateHeader(iso) {
   const today = new Date()
   const msgDate = new Date(iso)
-
   const isToday = today.toDateString() === msgDate.toDateString()
   const isYesterday = new Date(today.setDate(today.getDate() - 1)).toDateString() === msgDate.toDateString()
 
@@ -51,7 +48,7 @@ export default function ChatWindow() {
   const isProfessional = profileMode === "professional"
   const bottomRef = useRef(null)
 
-  // 👤 Extract user ID from token
+  // ✅ Decode userId from token
   useEffect(() => {
     try {
       const token = localStorage.getItem("jwtToken")
@@ -64,8 +61,10 @@ export default function ChatWindow() {
     }
   }, [])
 
-  // 🔌 Connect socket with auth token
+  // ✅ Connect socket after myId is set
   useEffect(() => {
+    if (!myId) return
+
     const token = localStorage.getItem("jwtToken")
     if (!token) return
 
@@ -74,16 +73,13 @@ export default function ChatWindow() {
     })
 
     setSocketInstance(s)
-
     return () => s.disconnect()
-  }, [])
+  }, [myId])
 
-  // 🖼️ Scroll to bottom when messages change
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [msgs])
 
-  // 👥 Load partner profile info
   useEffect(() => {
     if (!checkTokenValidity()) return
 
@@ -91,9 +87,7 @@ export default function ChatWindow() {
       try {
         const { data } = await axios.get(`${API}/chat/room/${roomId}/info`, {
           params: { mode: profileMode },
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
-          },
+          headers: { Authorization: `Bearer ${localStorage.getItem("jwtToken")}` },
         })
         setPartnerUsername(data.partnerUsername)
         setPartnerName(data.name)
@@ -104,50 +98,56 @@ export default function ChatWindow() {
     })()
   }, [roomId, profileMode])
 
-  // 💬 Load message history
   useEffect(() => {
     if (!checkTokenValidity()) return
 
     axios
       .get(`${API}/chat/room/${roomId}/messages`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
-        },
+        headers: { Authorization: `Bearer ${localStorage.getItem("jwtToken")}` },
       })
       .then((res) => setMsgs(res.data.messages))
       .catch((err) => console.error(err))
   }, [roomId])
 
-  // 🛎️ Listen for incoming messages (real-time)
+  // ✅ Handle receiving messages
   useEffect(() => {
-    if (!socketInstance || !roomId || !myId) return
+    if (!socketInstance || !roomId) return
 
     const listener = (m) => {
-      if (m.room === roomId) {
-        setMsgs((prev) => {
-          const alreadyExists = prev.some((msg) => msg._id === m._id)
-          if (alreadyExists) return prev
-          return [...prev, m]
-        })
-      }
+      setMsgs((prev) => {
+        const alreadyExists = prev.some((msg) => msg._id === m._id)
+        if (alreadyExists) return prev
+        return [...prev, m]
+      })
     }
 
     socketInstance.on("chat:receive", listener)
     return () => socketInstance.off("chat:receive", listener)
-  }, [socketInstance, roomId, myId])
+  }, [socketInstance, roomId])
 
-  // 🔊 Join room on socket
+  // ✅ Join chat room
   useEffect(() => {
     if (!roomId || !socketInstance) return
     socketInstance.emit("chat:join", roomId)
   }, [roomId, socketInstance])
 
-  // 📤 Send message
+  // ✅ Send message (without sender field)
   const send = () => {
     if (!text.trim() || !socketInstance) return
-    socketInstance.emit("chat:send", { roomId, text })
+
+    socketInstance.emit("chat:send", {
+      roomId,
+      text,
+    })
+
     setText("")
   }
+
+  // ✅ UI below remains unchanged
+  // ... [keep your message render, input box, etc., exactly as you have it]
+  // The rest of the JSX remains same — no change needed
+
+
 
   return (
     <div
