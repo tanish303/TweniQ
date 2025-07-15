@@ -26,6 +26,7 @@ const InputField = ({
     <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
       <Icon className="w-4 h-4 text-indigo-600" />
       {label}
+      {required && <span className="text-red-500">*</span>}
     </label>
     <div className="relative">
       <input
@@ -49,6 +50,7 @@ const TextAreaField = ({ icon: Icon, label, name, value, onChange, placeholder, 
     <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
       <Icon className="w-4 h-4 text-indigo-600" />
       {label}
+      {required && <span className="text-red-500">*</span>}
     </label>
     <div className="relative">
       <textarea
@@ -72,6 +74,7 @@ const SelectField = ({ icon: Icon, label, name, value, onChange, options, requir
     <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
       <Icon className="w-4 h-4 text-indigo-600" />
       {label}
+      {required && <span className="text-red-500">*</span>}
     </label>
     <div className="relative">
       <select
@@ -176,7 +179,7 @@ const Setupprofile = () => {
 
   useEffect(() => {
     if (!email) {
-      alert("Email verificatoin is not done. Redirecting to landing page...")
+      alert("Email verification is not done. Redirecting to landing page...")
       navigate("/", { replace: true })
     }
   }, [])
@@ -336,6 +339,7 @@ const Setupprofile = () => {
                 <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
                   <User className="w-4 h-4 text-indigo-600" />
                   Username
+                  <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <input
@@ -388,6 +392,7 @@ const Setupprofile = () => {
                   <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
                     <Lock className="w-4 h-4 text-indigo-600" />
                     Password
+                    <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
                     <input
@@ -416,6 +421,7 @@ const Setupprofile = () => {
                   <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
                     <Lock className="w-4 h-4 text-indigo-600" />
                     Confirm Password
+                    <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
                     <input
@@ -569,6 +575,14 @@ const Setupprofile = () => {
                 value={socialDpFile}
                 sectionColor="pink"
               />
+            </div>
+
+            {/* Required Fields Note */}
+            <div className="pt-4 border-t border-gray-200">
+              <p className="text-sm text-gray-600 flex items-center gap-1 justify-center">
+                <span className="text-red-500">*</span>
+                <span>are required fields</span>
+              </p>
             </div>
 
             {/* Submit Button */}
