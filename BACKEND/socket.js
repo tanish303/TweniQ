@@ -42,6 +42,8 @@ socket.on("chat:join", (roomId) => {
     // 4. Listen for incoming messages from this socket
     socket.on("chat:send", async ({ roomId, text }) => {
       try {
+          console.log("📨 Message received for room:", roomId, "from:", socket.userId);
+
         // Save the message to MongoDB
         const msg = await Message.create({
           room: roomId,

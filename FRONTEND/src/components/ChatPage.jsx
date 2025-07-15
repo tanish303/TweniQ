@@ -98,17 +98,24 @@ export default function ChatPage() {
 
   // ✉️ Start or go to chat
   const startChat = async (otherId) => {
-    try {
-      const { data } = await axios.post(
-        `${API}/chat/room`,
-        { otherUserId: otherId, mode: profileMode },
-        { headers: tokenHeader },
-      )
-      navigate(`/chat/${data.roomId}`)
-    } catch {
-      setError("Failed to start chat.")
-    }
+  try {
+    const { data } = await axios.post(
+      `${API}/chat/room`,
+      { otherUserId: otherId, mode: profileMode },
+      { headers: tokenHeader },
+    )
+
+    const newRoomId = data.roomId;
+
+    // ⏳ Wait 100–200ms to ensure socket has time to register the room
+    setTimeout(() => {
+      navigate(`/chat/${newRoomId}`);
+    }, 200);
+  } catch {
+    setError("Failed to start chat.")
   }
+}
+
 
   return (
     <div
