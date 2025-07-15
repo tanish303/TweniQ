@@ -1,22 +1,16 @@
 "use client"
 
-import { Link } from "react-router-dom"
-import { useParams, useNavigate } from "react-router-dom"
-import { useEffect, useState, useMemo, useRef } from "react"
+import { Link, useParams, useNavigate } from "react-router-dom"
+import { useEffect, useState, useRef } from "react"
 import { motion } from "framer-motion"
 import { io } from "socket.io-client"
 import axios from "axios"
 import { jwtDecode } from "jwt-decode"
 import { useProfile } from "../context/AppContext"
 import { ArrowLeft, Send, User, Calendar } from "lucide-react"
-import { checkTokenValidity } from "../utils/checkToken"; // ✅ Import the function
-
+import { checkTokenValidity } from "../utils/checkToken"
 
 const API = import.meta.env.VITE_API_BASE_URL
-
-const socket = io(API, {
-  auth: { token: localStorage.getItem("jwtToken") },
-})
 
 // 🕒 Format time like 3:45 PM
 function formatTime(iso) {
@@ -51,29 +45,47 @@ export default function ChatWindow() {
   const [partnerUsername, setPartnerUsername] = useState("Partner")
   const [partnerName, setPartnerName] = useState("")
   const [partnerDpUrl, setPartnerDpUrl] = useState("")
+  const [socketInstance, setSocketInstance] = useState(null)
+  const [myId, setMyId] = useState(null)
 
   const isProfessional = profileMode === "professional"
+  const bottomRef = useRef(null)
 
-  const myId = useMemo(() => {
+  // 👤 Extract user ID from token
+  useEffect(() => {
     try {
       const token = localStorage.getItem("jwtToken")
-      return token ? jwtDecode(token).userId : null
+      if (token) {
+        const decoded = jwtDecode(token)
+        setMyId(decoded.userId)
+      }
     } catch {
-      return null
+      setMyId(null)
     }
   }, [])
 
-  // 👉 ref to scroll to bottom
-  const bottomRef = useRef(null)
+  // 🔌 Connect socket with auth token
+  useEffect(() => {
+    const token = localStorage.getItem("jwtToken")
+    if (!token) return
 
-  // scroll on new messages
+    const s = io(API, {
+      auth: { token },
+    })
+
+    setSocketInstance(s)
+
+    return () => s.disconnect()
+  }, [])
+
+  // 🖼️ Scroll to bottom when messages change
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [msgs])
 
-  // Fetch partner info
+  // 👥 Load partner profile info
   useEffect(() => {
-      if (!checkTokenValidity()) return; // ✅ Check before making request
+    if (!checkTokenValidity()) return
 
     ;(async () => {
       try {
@@ -92,9 +104,9 @@ export default function ChatWindow() {
     })()
   }, [roomId, profileMode])
 
-  // Fetch message history
+  // 💬 Load message history
   useEffect(() => {
-      if (!checkTokenValidity()) return; // ✅ Check before loading messages
+    if (!checkTokenValidity()) return
 
     axios
       .get(`${API}/chat/room/${roomId}/messages`, {
@@ -102,39 +114,40 @@ export default function ChatWindow() {
           Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
         },
       })
-      .then((res) => {
-        setMsgs(res.data.messages)
-      })
+      .then((res) => setMsgs(res.data.messages))
       .catch((err) => console.error(err))
   }, [roomId])
 
-  // Real-time listener
-useEffect(() => {
-  const listener = (m) => {
-    if (m.room === roomId) {
-      setMsgs((prev) => {
-        const alreadyExists = prev.some((msg) => msg._id === m._id);
-        if (alreadyExists) return prev;
-        return [...prev, m];
-      });
+  // 🛎️ Listen for incoming messages (real-time)
+  useEffect(() => {
+    if (!socketInstance || !roomId || !myId) return
+
+    const listener = (m) => {
+      if (m.room === roomId) {
+        setMsgs((prev) => {
+          const alreadyExists = prev.some((msg) => msg._id === m._id)
+          if (alreadyExists) return prev
+          return [...prev, m]
+        })
+      }
     }
-  };
-  socket.on("chat:receive", listener);
-  return () => socket.off("chat:receive", listener);
-}, [roomId]);
-useEffect(() => {
-  if (!roomId) return
-  socket.emit("chat:join", roomId)
-}, [roomId])
 
+    socketInstance.on("chat:receive", listener)
+    return () => socketInstance.off("chat:receive", listener)
+  }, [socketInstance, roomId, myId])
 
-const send = () => {
-  if (!text.trim()) return;
-  socket.emit("chat:send", { roomId, text });
-  setText("");
-};
+  // 🔊 Join room on socket
+  useEffect(() => {
+    if (!roomId || !socketInstance) return
+    socketInstance.emit("chat:join", roomId)
+  }, [roomId, socketInstance])
 
-
+  // 📤 Send message
+  const send = () => {
+    if (!text.trim() || !socketInstance) return
+    socketInstance.emit("chat:send", { roomId, text })
+    setText("")
+  }
 
   return (
     <div
