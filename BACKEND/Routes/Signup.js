@@ -24,28 +24,41 @@ router.post("/sendotp", async (req, res) => {
       return res.status(400).json({ message: "Invalid email address" });
     }
 
-    // Check if the email exists in the database
-    const user = await User.findOne({ email });
+    // Check if the email already exists and has completed signup
+    const existingUser = await User.findOne({ email });
 
-    // If user exists and has completed signup, prevent sending OTP again
-    if (user && user.password) {
-      return res.status(409).json({ message: "Email already registered. Please log in." });
+    if (existingUser && existingUser.password) {
+      return res
+        .status(409)
+        .json({ message: "Email already registered. Please log in." });
     }
 
-    // Generate OTP
+    // Generate a 6-digit OTP
     const otp = crypto.randomInt(100000, 999999);
 
-    // Upsert (insert or update) the user record with the new OTP and expiry time
+    // Upsert user: insert if new, or update OTP if already exists
     await User.updateOne(
       { email },
       {
-        otp,
-        otpExpiresAt: Date.now() + 10 * 60 * 1000, // OTP expires in 10 minutes
+        $set: {
+          otp,
+          otpExpiresAt: Date.now() + 10 * 60 * 1000, // OTP expires in 10 mins
+        },
+        $setOnInsert: {
+          username: null, // explicitly set null for sparse index
+          password: "",   // placeholder, will be updated later
+          socialProfile: {
+            name: "placeholder", // required by schema
+          },
+          professionalProfile: {
+            name: "placeholder", // required by schema
+          },
+        },
       },
       { upsert: true }
     );
 
-    // Configure nodemailer transporter
+    // Configure nodemailer
     const transporter = nodemailer.createTransport({
       service: "Gmail",
       auth: {
@@ -54,11 +67,12 @@ router.post("/sendotp", async (req, res) => {
       },
     });
 
-  await transporter.sendMail({
-  from: `"TweniQ" <tweniq@gmail.com>`, // ✅ Capitalized name shown to user
-  to: email,
-  subject: "Verify Your Email",
-  text: `Hi there!
+    // Send OTP email
+    await transporter.sendMail({
+      from: `"TweniQ" <tweniq@gmail.com>`,
+      to: email,
+      subject: "Verify Your Email",
+      text: `Hi there!
 
 To continue with your registration, please verify your email using the OTP below:
 
@@ -68,15 +82,15 @@ If you didn’t request this, you can safely ignore this email.
 
 Thanks,  
 The TweniQ Team`,
-});
+    });
 
-
-    res.status(200).json({ message: "OTP sent to your email" });
+    return res.status(200).json({ message: "OTP sent to your email" });
   } catch (error) {
     console.error("Error sending OTP:", error);
-    res.status(500).json({ message: "Internal server error" });
+    return res.status(500).json({ message: "Internal server error" });
   }
 });
+
 
 // For verifying the otp entered by user
 
