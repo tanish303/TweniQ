@@ -19,7 +19,10 @@ const Chat          = require("./Routes/Chat");
 const GlobalUserData          = require("./Routes/GlobalUserData");
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: "https://tweniq.vercel.app",
+  credentials: true
+}));
 app.use(express.json());
 
 

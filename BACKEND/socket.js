@@ -5,9 +5,12 @@ const ChatRoom = require("./Models/ChatRoom");
 const Message = require("./Models/Message");
 
 module.exports = (httpServer) => {
-  // 1. Create Socket.IO server with CORS enabled
   const io = new Server(httpServer, {
-    cors: { origin: "*" } // tighten in production
+    cors: {
+      origin: "https://tweniq.vercel.app",
+      methods: ["GET", "POST"],
+      credentials: true
+    }
   });
 
   // 2. JWT-based authentication middleware
