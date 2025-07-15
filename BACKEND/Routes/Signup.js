@@ -111,6 +111,7 @@ console.error("Error verifying OTP:", error);
 
 router.get("/usernameavailability", async (req, res) => {
   try {
+console.log("Username to check for availability:", req.query.username);
 const username = req.query.username?.trim();
 
     if (!username) {
@@ -146,7 +147,6 @@ const username = req.query.username?.trim();
 });
 
 
-
 router.post(
   "/saveprofiledata",
   upload.fields([
@@ -160,13 +160,20 @@ router.post(
       const user = await User.findOne({ email });
       if (!user) return res.status(404).json({ message: "User not found" });
 
-      // 👇 Check if the new username is taken by someone else
-      if (username && username !== user.username) {
-        const existingUser = await User.findOne({ username: { $regex: `^${username}$`, $options: "i" } });
+      const trimmedUsername = username?.trim();
+
+      if (trimmedUsername && trimmedUsername !== user.username) {
+        const existingUser = await User.findOne({
+          username: { $regex: `^${trimmedUsername}$`, $options: "i" },
+        });
+
         if (existingUser) {
-          return res.status(409).json({ message: "Username already taken. Please choose another." });
+          return res
+            .status(409)
+            .json({ message: "Username already taken. Please choose another." });
         }
-        user.username = username;
+
+        user.username = trimmedUsername;
       }
 
       if (password) {
@@ -205,9 +212,10 @@ router.post(
         username: user.username,
       });
     } catch (error) {
-      // ✅ Specific error handler for duplicate usernames
       if (error.code === 11000 && error.keyPattern?.username) {
-        return res.status(409).json({ message: "Username already taken. Please choose another." });
+        return res
+          .status(409)
+          .json({ message: "Username already taken. Please choose another." });
       }
 
       console.error("Error updating user profile:", error);
@@ -215,6 +223,7 @@ router.post(
     }
   }
 );
+
 
 
 
