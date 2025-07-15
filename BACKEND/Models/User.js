@@ -3,8 +3,13 @@ const mongoose = require("mongoose");
 const userSchema = new mongoose.Schema(
   {
     /* ───────── Core Auth Fields ───────── */
-    username: { type: String, required: true, unique: true, trim: true },
-    email:    { type: String, required: true, unique: true, trim: true },
+username: {
+  type: String,
+  unique: true,
+  sparse: true,  // ✅ allow multiple `null` or missing values
+  trim: true,
+  default: null  // ✅ explicitly default to null if not set
+},    email:    { type: String, required: true, unique: true, trim: true },
     password: { type: String, required: true },
 
     otp:          { type: String, default: null },

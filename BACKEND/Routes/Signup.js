@@ -111,7 +111,7 @@ console.error("Error verifying OTP:", error);
 
 router.get("/usernameavailability", async (req, res) => {
   try {
-    const username = req.query.username;
+const username = req.query.username?.trim();
 
     if (!username) {
       return res.status(400).json({
@@ -160,7 +160,14 @@ router.post(
       const user = await User.findOne({ email });
       if (!user) return res.status(404).json({ message: "User not found" });
 
-      user.username = username || user.username;
+      // 👇 Check if the new username is taken by someone else
+      if (username && username !== user.username) {
+        const existingUser = await User.findOne({ username: { $regex: `^${username}$`, $options: "i" } });
+        if (existingUser) {
+          return res.status(409).json({ message: "Username already taken. Please choose another." });
+        }
+        user.username = username;
+      }
 
       if (password) {
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -174,7 +181,7 @@ router.post(
         ...user.socialProfile,
         ...parsedSocial,
         dpUrl: req.files?.socialDp?.[0]
-          ? req.files.socialDp[0].path // ✅ Cloudinary path
+          ? req.files.socialDp[0].path
           : user.socialProfile.dpUrl,
       };
 
@@ -182,7 +189,7 @@ router.post(
         ...user.professionalProfile,
         ...parsedProfessional,
         dpUrl: req.files?.professionalDp?.[0]
-          ? req.files.professionalDp[0].path // ✅ Cloudinary path
+          ? req.files.professionalDp[0].path
           : user.professionalProfile.dpUrl,
       };
 
@@ -198,11 +205,17 @@ router.post(
         username: user.username,
       });
     } catch (error) {
+      // ✅ Specific error handler for duplicate usernames
+      if (error.code === 11000 && error.keyPattern?.username) {
+        return res.status(409).json({ message: "Username already taken. Please choose another." });
+      }
+
       console.error("Error updating user profile:", error);
       return res.status(500).json({ message: "An error occurred", error });
     }
   }
 );
+
 
 
 
