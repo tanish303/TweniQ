@@ -1,9 +1,3 @@
-/**
- * Message model
- * -------------
- * Stores every chat message with sender reference
- * and links back to its parent ChatRoom.
- */
 
 const mongoose = require("mongoose");
 
