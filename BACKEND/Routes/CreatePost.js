@@ -15,7 +15,7 @@ router.post('/checkfriendexists', async (req, res) => {
       return res.status(400).json({ success: false, message: 'Username is required' });
     }
 
-    const friend = await User.findOne({ username });
+    const friend = await User.findOne({ username: { $regex: `^${username}$`, $options: 'i' } });
 
     if (friend) {
       return res.status(200).json({ success: true, message: 'Username exists' });
