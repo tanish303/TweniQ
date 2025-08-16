@@ -21,7 +21,6 @@ function verifyToken(req) {
 }
 
 /* ---------- GET /account/overview ---------- */
-/* routes/Account.js (or wherever the route lives) */
 router.get("/overview", async (req, res) => {
   try {
     const { userId } = verifyToken(req);

@@ -1,12 +1,53 @@
-# React + Vite
+# Tweniq
+Tweniq is a revolutionary dual-mode networking platform that perfectly blends **social fun and professional engagement** in one app.  
+Every feature—posts, feeds, chats, and profiles is fully separated between social and professional modes, giving users the freedom to **express themselves personally while staying professional**.  
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Switch seamlessly between moods and work life, enjoy tailored interactions, and keep your social and professional worlds **completely distinct yet effortlessly connected**.
 
-Currently, two official plugins are available:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🌟 Features
 
-## Expanding the ESLint configuration
+- **Dual Profiles**
+  - Social profile: interact with friends, like, comment, post updates, tag friends, and add moods to your posts.
+  - Professional profile: share professional posts, polls, upvotes, save posts and connect with colleagues.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- **Dynamic Feed**
+  - Separate feeds for social and professional posts.
+  - Like, comment, save, tag friends, and participate in polls.
+
+- **Post Creation**
+  - Social mode: create posts with moods, tags, images, or text.
+  - Professional mode: create posts with polls for professional engagement.
+  - Can tag anyone in your social posts.
+
+- **Account Management**
+  - View saved posts, liked posts, created posts, followers, and following **separately for both social and professional modes**.
+  - Change password securely.
+  - Manage profile pictures for both modes.
+  - Can visit anyone's profile by clicking on their username.
+
+- **Chat System**
+  - Real-time chat.
+  - Supports conversation history.
+  - Search and start chats with any user by their username.
+
+- **Everything is separated for both modes**
+  - Posts, feeds, and chats are completely independent between **social** and **professional** profiles.
+  - Only followers list is shared across both modes.
+
+- **Authentication & Security**
+  - Signup/login with JWT authentication.
+  - Email verification via OTP.
+
+- **Profile Customization**
+  - Upload display pictures for both social and professional profiles.
+  - Toggle between social and professional profiles seamlessly.
+  - Customize personal information on both profiles.
+
+- **Responsive & Interactive UI**
+  - Clean, modern, and animated interface.
+  - Tailored UI themes for social and professional modes.
+  - Fully responsive for mobile devices.
+  - Toast notifications for real-time feedback.
+
+
