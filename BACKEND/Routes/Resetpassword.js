@@ -1,129 +1,134 @@
-const express = require("express")
-const router = express.Router()
-const nodemailer = require("nodemailer")
-const crypto = require("crypto")
-const User = require("../Models/User")
-const bcrypt = require("bcrypt")
+const express = require("express");
+const router = express.Router();
+const { Resend } = require("resend");
+const crypto = require("crypto");
+const User = require("../Models/User");
+const bcrypt = require("bcrypt");
 
+// Initialize Resend
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+/* =========================
+   SEND OTP (FORGOT PASSWORD)
+========================= */
 router.post("/sendotp", async (req, res) => {
   try {
-    const { email } = req.body
+    const { email } = req.body;
 
     // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      return res.status(400).json({ message: "Invalid email address" })
+      return res.status(400).json({ message: "Invalid email address" });
     }
 
-    // Check if the email exists in the database
-    const user = await User.findOne({ email })
+    // Check if email exists
+    const user = await User.findOne({ email });
     if (!user) {
-      return res.status(404).json({ message: "Email not found in our records" })
+      return res.status(404).json({ message: "Email not found in our records" });
     }
 
     // Generate OTP
-    const otp = crypto.randomInt(100000, 999999)
+    const otp = crypto.randomInt(100000, 999999);
 
-    // Update user record with the new OTP and expiry time
-    await User.updateOne(
-      { email },
-      {
-        otp,
-        otpExpiresAt: Date.now() + 10 * 60 * 1000, // OTP expires in 10 minutes
-      },
-    )
+    // Save OTP + expiry
+    user.otp = otp;
+    user.otpExpiresAt = Date.now() + 10 * 60 * 1000; // 10 minutes
+    await user.save();
 
-    // Configure nodemailer transporter
-    const transporter = nodemailer.createTransport({
-      service: "Gmail",
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    })
-await transporter.sendMail({
-  from: `"TweniQ" <tweniq@gmail.com>`, // ✅ Display name + email
-  to: email,
-  subject: "Password Reset Request",
-  text: `Hi,
+    // Send OTP via Resend
+    await resend.emails.send({
+      from: "TweniQ <onboarding@resend.dev>", // test mode sender
+      to: email,
+      subject: "Password Reset Request",
+      text: `Hi,
 
-We received a request to reset your password. Use the OTP below to proceed:
+We received a request to reset your password.
 
 🔐 OTP for Password Reset: ${otp}
 
-If you didn't request a password reset, please ignore this email.
+This OTP is valid for 10 minutes.
+
+If you didn't request this, you can safely ignore this email.
 
 – The TweniQ Team`,
+    });
+
+    return res.status(200).json({ message: "OTP sent to your email" });
+  } catch (error) {
+    console.error("Error sending OTP:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
 });
 
-
-    res.status(200).json({ message: "OTP sent to your email" })
-  } catch (error) {
-    console.error("Error sending OTP:", error)
-    res.status(500).json({ message: "Internal server error" })
-  }
-})
-
-// For verifying the otp entered by user
+/* =========================
+   VERIFY OTP (FORGOT PASSWORD)
+========================= */
 router.post("/verifyotp", async (req, res) => {
   try {
-    const { email, otp } = req.body
+    const { email, otp } = req.body;
 
-    const user = await User.findOne({ email })
+    const user = await User.findOne({ email });
     if (!user) {
-      return res.status(404).json({ message: "User not found" })
+      return res.status(404).json({ message: "User not found" });
     }
 
-    // Check if OTP has expired
-    if (Date.now() > user.otpExpiresAt) {
-      return res.status(400).json({ message: "OTP has expired. Please request a new one." })
+    // Check expiry
+    if (!user.otp || Date.now() > user.otpExpiresAt) {
+      return res.status(400).json({
+        message: "OTP has expired. Please request a new one.",
+        success: false,
+      });
     }
 
-    if (otp === user.otp) {
-      res.status(200).json({
+    if (Number(otp) === user.otp) {
+      return res.status(200).json({
         message: "OTP verified successfully",
         success: true,
-      })
-    } else {
-      return res.status(400).json({ message: "Invalid OTP", success: false })
+      });
     }
-  } catch (error) {
-    console.error("Error verifying OTP:", error)
-    res.status(500).json({ message: "Internal server error" })
-  }
-})
 
+    return res.status(400).json({
+      message: "Invalid OTP",
+      success: false,
+    });
+  } catch (error) {
+    console.error("Error verifying OTP:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+/* =========================
+   SET NEW PASSWORD
+========================= */
 router.post("/setnewpassword", async (req, res) => {
   try {
-    const { email, newpassword } = req.body
+    const { email, newpassword } = req.body;
 
-    const user = await User.findOne({ email })
+    const user = await User.findOne({ email });
     if (!user) {
-      return res.status(404).json({ message: "User not found" })
+      return res.status(404).json({ message: "User not found" });
     }
 
-    // Hash the new password before saving
-    const saltRounds = 10
-    const hashedPassword = await bcrypt.hash(newpassword, saltRounds)
+    // Hash new password
+    const hashedPassword = await bcrypt.hash(newpassword, 10);
 
-    user.password = hashedPassword
-    // Clear OTP fields after successful password reset
-    user.otp = undefined
-    user.otpExpiresAt = undefined
+    user.password = hashedPassword;
+    user.otp = undefined;
+    user.otpExpiresAt = undefined;
 
-    await user.save()
+    await user.save();
 
-    res.status(200).json({
+    return res.status(200).json({
       message: "Password reset successfully",
       success: true,
-    })
+    });
   } catch (error) {
-    console.error("Error resetting password:", error)
-    res.status(500).json({
-      message: "Server Error",
+    console.error("Error resetting password:", error);
+    return res.status(500).json({
+      message: "Server error",
       success: false,
-    })
+    });
   }
-})
+});
 
-module.exports = router
+module.exports = router;
