@@ -1,12 +1,15 @@
 const express = require("express");
 const router = express.Router();
-const nodemailer = require("nodemailer");
+const { Resend } = require("resend");
 const crypto = require("crypto");
 const User = require("../Models/User");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
 const upload = require("../config/multerConfig");
+
+// Initialize Resend
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 /* =========================
    SEND OTP
@@ -30,7 +33,6 @@ router.post("/sendotp", async (req, res) => {
     }
 
     const otp = crypto.randomInt(100000, 999999);
-
     const tempUsername = `tempuser_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
 
     // Upsert user
@@ -51,35 +53,20 @@ router.post("/sendotp", async (req, res) => {
       { upsert: true }
     );
 
-    /* =========================
-       BREVO SMTP CONFIG
-    ========================= */
-    const transporter = nodemailer.createTransport({
-      host: "smtp-relay.brevo.com",
-      port: 587,
-      secure: false,
-      auth: {
-        user: process.env.BREVO_SMTP_USER,
-        pass: process.env.BREVO_SMTP_PASS,
-      },
-    });
-
-    // Send OTP email
-    await transporter.sendMail({
-      from: `"TweniQ" <tweniq@gmail.com>`, // must be verified sender in Brevo
+    // Send OTP email via Resend (NO SMTP)
+    await resend.emails.send({
+      from: "TweniQ <onboarding@resend.dev>", // default Resend sender
       to: email,
       subject: "Verify Your Email",
       text: `Hi there!
 
-To continue with your registration, please verify your email using the OTP below:
-
-🔐 Your One-Time Password (OTP): ${otp}
+Your One-Time Password (OTP) is: ${otp}
 
 This OTP is valid for 10 minutes.
 
 If you didn’t request this, you can safely ignore this email.
 
-Thanks,  
+Thanks,
 The TweniQ Team`,
     });
 
@@ -102,7 +89,6 @@ router.post("/verifyotp", async (req, res) => {
       return res.status(400).json({ message: "OTP not found", success: false });
     }
 
-    // Check expiry
     if (Date.now() > user.otpExpiresAt) {
       return res.status(410).json({
         message: "OTP expired. Please request a new one.",
@@ -115,12 +101,12 @@ router.post("/verifyotp", async (req, res) => {
         message: "OTP verified successfully",
         success: true,
       });
-    } else {
-      return res.status(403).json({
-        message: "Incorrect OTP",
-        success: false,
-      });
     }
+
+    return res.status(403).json({
+      message: "Incorrect OTP",
+      success: false,
+    });
   } catch (error) {
     console.error("Error verifying OTP:", error);
     res.status(500).json({ message: "Internal server error" });
