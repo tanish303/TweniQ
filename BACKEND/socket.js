@@ -12,7 +12,7 @@ module.exports = (httpServer) => {
       credentials: true
     }
   });
-
+  
   // 2. JWT-based authentication middleware
   io.use((socket, next) => {
     try {

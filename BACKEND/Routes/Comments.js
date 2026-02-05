@@ -43,7 +43,7 @@ router.get("/getcomments", async (req, res) => {
       }
 
       return {
-        username,       // 👈 new field
+        username,       
         displayName,
         dpUrl,
         text: c.comment,

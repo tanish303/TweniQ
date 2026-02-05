@@ -6,73 +6,67 @@ const User = require("../Models/User");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
+const upload = require("../config/multerConfig");
 
-
-const upload = require("../config/multerConfig"); // ✅ Import cloudinary multer config
-
-
-
-// For sending otp 
-
+/* =========================
+   SEND OTP
+========================= */
 router.post("/sendotp", async (req, res) => {
   try {
     const { email } = req.body;
 
-    // Validate email format
+    // Validate email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return res.status(400).json({ message: "Invalid email address" });
     }
 
-    // Check if the email already exists and has completed signup
+    // Check if user already completed signup
     const existingUser = await User.findOne({ email });
-
     if (existingUser && existingUser.password) {
       return res
         .status(409)
         .json({ message: "Email already registered. Please log in." });
     }
 
-    // Generate a 6-digit OTP
     const otp = crypto.randomInt(100000, 999999);
 
-    // Generate a random temporary username (only if new user is created)
     const tempUsername = `tempuser_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
 
-    // Upsert user: insert if new, or update OTP if already exists
+    // Upsert user
     await User.updateOne(
       { email },
       {
         $set: {
           otp,
-          otpExpiresAt: Date.now() + 10 * 60 * 1000, // OTP expires in 10 mins
+          otpExpiresAt: Date.now() + 10 * 60 * 1000, // 10 minutes
         },
         $setOnInsert: {
-          username: tempUsername, // ✅ unique placeholder username
-          password: "",           // placeholder password
-          socialProfile: {
-            name: "placeholder",  // required field
-          },
-          professionalProfile: {
-            name: "placeholder",  // required field
-          },
+          username: tempUsername,
+          password: "",
+          socialProfile: { name: "placeholder" },
+          professionalProfile: { name: "placeholder" },
         },
       },
       { upsert: true }
     );
 
-    // Configure nodemailer
+    /* =========================
+       BREVO SMTP CONFIG
+    ========================= */
     const transporter = nodemailer.createTransport({
-      service: "Gmail",
+      host: "smtp-relay.brevo.com",
+      port: 587,
+      secure: false,
       auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
+        user: process.env.BREVO_SMTP_USER,
+        pass: process.env.BREVO_SMTP_PASS,
       },
     });
 
     // Send OTP email
     await transporter.sendMail({
-      from: `"TweniQ" <tweniq@gmail.com>`,
+      from: `"TweniQ" <tweniq@gmail.com>`, // must be verified sender in Brevo
       to: email,
       subject: "Verify Your Email",
       text: `Hi there!
@@ -80,6 +74,8 @@ router.post("/sendotp", async (req, res) => {
 To continue with your registration, please verify your email using the OTP below:
 
 🔐 Your One-Time Password (OTP): ${otp}
+
+This OTP is valid for 10 minutes.
 
 If you didn’t request this, you can safely ignore this email.
 
@@ -94,44 +90,49 @@ The TweniQ Team`,
   }
 });
 
+/* =========================
+   VERIFY OTP
+========================= */
+router.post("/verifyotp", async (req, res) => {
+  try {
+    const { email, otp } = req.body;
 
+    const user = await User.findOne({ email });
+    if (!user || !user.otp) {
+      return res.status(400).json({ message: "OTP not found", success: false });
+    }
 
-// For verifying the otp entered by user
+    // Check expiry
+    if (Date.now() > user.otpExpiresAt) {
+      return res.status(410).json({
+        message: "OTP expired. Please request a new one.",
+        success: false,
+      });
+    }
 
-  router.post("/verifyotp", async (req,res)=>
-  {
-    try {
-      const {email, otp} = req.body;
-      const user = await User.findOne({email});
-      const userotp = await user.otp;
-      if(otp == userotp)
-      {
-        res.status(200)
-        .json({
-            message: "Otp is correct ",
-            success: true,
-            
-          
-        })
+    if (otp == user.otp) {
+      return res.status(200).json({
+        message: "OTP verified successfully",
+        success: true,
+      });
+    } else {
+      return res.status(403).json({
+        message: "Incorrect OTP",
+        success: false,
+      });
+    }
+  } catch (error) {
+    console.error("Error verifying OTP:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
 
-      }
-      else{
-        return res.status(403)
-                .json({ message: "OTP is wrong", success: false });
-      }
-
-      
-    } catch (error) {
-console.error("Error verifying OTP:", error);
-    res.status(500).json({ message: "Internal server error" });    }
-  });
-
-
+/* =========================
+   USERNAME AVAILABILITY
+========================= */
 router.get("/usernameavailability", async (req, res) => {
   try {
-console.log("Username to check for availability:", req.query.username);
-const username = req.query.username?.trim();
-
+    const username = req.query.username?.trim();
     if (!username) {
       return res.status(400).json({
         available: false,
@@ -139,24 +140,16 @@ const username = req.query.username?.trim();
       });
     }
 
-    // Check if the username exists (case-insensitive)
     const user = await User.findOne({
       username: { $regex: `^${username}$`, $options: "i" },
     });
 
-    if (!user) {
-      return res.status(200).json({
-        available: true,
-        message: "Username is available",
-      });
-    } else {
-      return res.status(200).json({
-        available: false,
-        message: "Username already taken",
-      });
-    }
+    return res.status(200).json({
+      available: !user,
+      message: user ? "Username already taken" : "Username is available",
+    });
   } catch (error) {
-    console.error("Error checking username availability:", error.message);
+    console.error("Error checking username availability:", error);
     res.status(500).json({
       available: false,
       message: "Internal server error",
@@ -164,7 +157,9 @@ const username = req.query.username?.trim();
   }
 });
 
-
+/* =========================
+   SAVE PROFILE DATA
+========================= */
 router.post(
   "/saveprofiledata",
   upload.fields([
@@ -173,54 +168,49 @@ router.post(
   ]),
   async (req, res) => {
     try {
-      const { email, username, password, socialProfile, professionalProfile } = req.body;
+      const { email, username, password, socialProfile, professionalProfile } =
+        req.body;
 
       const user = await User.findOne({ email });
       if (!user) return res.status(404).json({ message: "User not found" });
 
       const trimmedUsername = username?.trim();
-
       if (trimmedUsername && trimmedUsername !== user.username) {
-          if (trimmedUsername.startsWith("tempuser_")) {
-    return res.status(400).json({
-      message: "Invalid username. Please choose a more personal username.",
-    });
-  }
+        if (trimmedUsername.startsWith("tempuser_")) {
+          return res.status(400).json({
+            message: "Invalid username. Please choose a more personal username.",
+          });
+        }
+
         const existingUser = await User.findOne({
           username: { $regex: `^${trimmedUsername}$`, $options: "i" },
         });
 
         if (existingUser) {
-          return res
-            .status(409)
-            .json({ message: "Username already taken. Please choose another." });
+          return res.status(409).json({
+            message: "Username already taken. Please choose another.",
+          });
         }
 
         user.username = trimmedUsername;
       }
 
       if (password) {
-        const hashedPassword = await bcrypt.hash(password, 10);
-        user.password = hashedPassword;
+        user.password = await bcrypt.hash(password, 10);
       }
-
-      const parsedSocial = JSON.parse(socialProfile);
-      const parsedProfessional = JSON.parse(professionalProfile);
 
       user.socialProfile = {
         ...user.socialProfile,
-        ...parsedSocial,
-        dpUrl: req.files?.socialDp?.[0]
-          ? req.files.socialDp[0].path
-          : user.socialProfile.dpUrl,
+        ...JSON.parse(socialProfile),
+        dpUrl: req.files?.socialDp?.[0]?.path || user.socialProfile.dpUrl,
       };
 
       user.professionalProfile = {
         ...user.professionalProfile,
-        ...parsedProfessional,
-        dpUrl: req.files?.professionalDp?.[0]
-          ? req.files.professionalDp[0].path
-          : user.professionalProfile.dpUrl,
+        ...JSON.parse(professionalProfile),
+        dpUrl:
+          req.files?.professionalDp?.[0]?.path ||
+          user.professionalProfile.dpUrl,
       };
 
       await user.save();
@@ -235,21 +225,10 @@ router.post(
         username: user.username,
       });
     } catch (error) {
-      if (error.code === 11000 && error.keyPattern?.username) {
-        return res
-          .status(409)
-          .json({ message: "Username already taken. Please choose another." });
-      }
-
       console.error("Error updating user profile:", error);
-      return res.status(500).json({ message: "An error occurred", error });
+      return res.status(500).json({ message: "An error occurred" });
     }
   }
 );
-
-
-
-
-
 
 module.exports = router;
