@@ -10,6 +10,6 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-const SENDER = `"TweniQ" <${process.env.BREVO_SENDER || "tanishdhingra2004@gmail.com"}>`;
+const SENDER = `"TweniQ" <${process.env.BREVO_SENDER || "tweniq@gmail.com"}>`;
 
 module.exports = { transporter, SENDER };
