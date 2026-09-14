@@ -1,21 +1,20 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 import { motion } from "framer-motion"
 import { ToastContainer, toast } from "react-toastify"
 import { MessageCircle, Bookmark, Heart, UserPlus, Check, User, Loader2 } from "lucide-react"
 import { useProfile, useApp } from "../context/AppContext"
 import { useNavigate } from "react-router-dom"
-import { useEffect } from "react"
 import axios from "axios"
 import { Link } from "react-router-dom"
 import { checkTokenValidity } from "../utils/checkToken"
-
 
 export default function FeedPage() {
   const { profileMode } = useProfile()
   const [posts, setPosts] = useState([])
   const [loading, setLoading] = useState(true)
+  const likingInProgressRef = useRef(new Set())
   const { globalusername } = useApp()
   const navigate = useNavigate()
   const isProfessional = profileMode === "professional"
@@ -90,46 +89,64 @@ const handleToggleFollow = async (authorUsername, postId) => {
 };
 
 
- const handleLikeToggle = async (postId) => {
-  if (!checkTokenValidity()) return;
+  const handleLikeToggle = async (postId) => {
+    if (!checkTokenValidity()) return;
 
-  try {
-    const jwtToken = localStorage.getItem("jwtToken");
-    const mode = profileMode;
+    // Prevent concurrent/duplicate clicks while a like request is in-flight for this post
+    if (likingInProgressRef.current.has(postId)) return;
+    likingInProgressRef.current.add(postId);
 
-    if (!jwtToken || !postId || !mode) {
-      toast.warn("Missing jwtToken, postId, or mode , Sign in again");
-      return;
-    }
+    try {
+      const jwtToken = localStorage.getItem("jwtToken");
+      const mode = profileMode;
 
-    const response = await axios.post(
-      `${APIURL}/likeunlike/toggle-like`,
-      { postId, mode },
-      {
-        headers: {
-          Authorization: `Bearer ${jwtToken}`,
-        },
+      if (!jwtToken || !postId || !mode) {
+        toast.warn("Missing jwtToken, postId, or mode , Sign in again");
+        return;
       }
-    );
 
-    if (response.status === 200) {
-      const { isLiked } = response.data;
-      setPosts((prevPosts) =>
-        prevPosts.map((post) =>
-          post.postId === postId
-            ? {
+      const response = await axios.post(
+        `${APIURL}/likeunlike/toggle-like`,
+        { postId, mode },
+        {
+          headers: {
+            Authorization: `Bearer ${jwtToken}`,
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        const { isLiked } = response.data;
+        setPosts((prevPosts) =>
+          prevPosts.map((post) => {
+            if (post.postId !== postId) return post;
+
+            // If backend returned exact numberOfLikes, sync directly
+            if (typeof response.data.numberOfLikes === "number") {
+              return {
                 ...post,
                 isLiked,
-                numberOfLikes: isLiked ? post.numberOfLikes + 1 : post.numberOfLikes - 1,
-              }
-            : post
-        )
-      );
+                numberOfLikes: response.data.numberOfLikes,
+              };
+            }
+
+            // Only increment/decrement if like state actually flipped
+            if (post.isLiked === isLiked) return post;
+
+            return {
+              ...post,
+              isLiked,
+              numberOfLikes: Math.max(0, isLiked ? post.numberOfLikes + 1 : post.numberOfLikes - 1),
+            };
+          })
+        );
+      }
+    } catch (error) {
+      toast.error("Error toggling like. Please signin again or contact the support team");
+    } finally {
+      likingInProgressRef.current.delete(postId);
     }
-  } catch (error) {
-    toast.error("Error toggling like. Please signin again or contact the support team");
-  }
-};
+  };
 
 
   const handleVote = async (selectedOption, postId) => {

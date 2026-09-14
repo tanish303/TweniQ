@@ -45,13 +45,22 @@ router.post('/toggle-like', async (req, res) => {
     const alreadyLiked = post.likes.includes(user._id);
     const profilePath = mode === 'professional' ? 'professionalProfile.likedPosts' : 'socialProfile.likedPosts';
 
+    let updatedPost;
     if (alreadyLiked) {
       // UNLIKE
-      await postModel.updateOne({ _id: postId }, { $pull: { likes: user._id } });
+      updatedPost = await postModel.findByIdAndUpdate(
+        postId,
+        { $pull: { likes: user._id } },
+        { new: true }
+      );
       user.set(profilePath, user.get(profilePath).filter(id => id.toString() !== postId));
     } else {
       // LIKE
-      await postModel.updateOne({ _id: postId }, { $addToSet: { likes: user._id } });
+      updatedPost = await postModel.findByIdAndUpdate(
+        postId,
+        { $addToSet: { likes: user._id } },
+        { new: true }
+      );
       user.get(profilePath).push(post._id);
     }
 
@@ -61,6 +70,7 @@ router.post('/toggle-like', async (req, res) => {
     return res.status(200).json({
       success: true,
       isLiked: !alreadyLiked,
+      numberOfLikes: updatedPost ? updatedPost.likes.length : 0,
       message: alreadyLiked ? "Unliked" : "Liked",
     });
   } catch (error) {
