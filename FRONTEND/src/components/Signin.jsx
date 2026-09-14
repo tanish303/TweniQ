@@ -75,23 +75,12 @@ const SignIn = () => {
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-purple-100 via-purple-300 to-indigo-300 flex items-center justify-center p-4">
       <div className="relative w-full max-w-md">
-        <div className="text-center mb-6">
+        <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-4 py-2 mb-4">
             <div className="flex items-center text-in font-bold">
               <span className="text-white mr-2">Welcome to</span>
               <Tweniq />
             </div>
-          </div>
-
-          <div className="flex justify-center">
-            <button
-              type="button"
-              onClick={() => setShowGuestModal(true)}
-              className="group flex items-center gap-3 px-7 sm:px-9 py-3 sm:py-3.5 bg-emerald-600 hover:bg-emerald-500 border-2 border-emerald-400/60 hover:border-emerald-300 rounded-full text-white text-sm sm:text-base font-semibold shadow-xl shadow-emerald-950/25 hover:scale-105 transition-all duration-300 cursor-pointer"
-            >
-              <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-emerald-300 rounded-full animate-pulse shadow-sm shadow-emerald-300"></div>
-              <span>Enter as a guest</span>
-            </button>
           </div>
         </div>
 
@@ -282,12 +271,25 @@ const SignIn = () => {
               <p className="text-gray-600">
                 Don't have an account?{" "}
                 <button
+                  type="button"
                   onClick={() => navigate("/signup")}
-                  className="text-purple-600 hover:underline"
+                  className="text-purple-600 hover:underline font-medium"
                 >
                   Sign up here
                 </button>
               </p>
+            </div>
+
+            {/* Enter as a guest Button inside the box */}
+            <div className="mt-6 pt-5 border-t border-gray-100 flex flex-col items-center">
+              <button
+                type="button"
+                onClick={() => setShowGuestModal(true)}
+                className="group w-full py-3 px-5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white rounded-xl text-sm sm:text-base font-semibold shadow-lg shadow-emerald-500/25 hover:shadow-xl hover:scale-[1.01] transition-all duration-300 cursor-pointer flex items-center justify-center gap-2.5"
+              >
+                <div className="w-2.5 h-2.5 bg-emerald-200 rounded-full animate-pulse shadow-sm shadow-emerald-200"></div>
+                <span>Enter as a guest</span>
+              </button>
             </div>
           </div>
         </div>

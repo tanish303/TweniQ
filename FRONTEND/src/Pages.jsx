@@ -1,8 +1,8 @@
 "use client"
 
-import { useEffect } from "react"
+import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Home, PlusCircle, MessageCircle, User, Briefcase, Heart } from "lucide-react"
+import { Home, PlusCircle, MessageCircle, User, Briefcase, Heart, ArrowUp, X } from "lucide-react"
 import { useNavigate, useLocation, Outlet } from "react-router-dom"
 import { useProfile } from "./context/AppContext"
 
@@ -10,6 +10,19 @@ export default function Pages() {
   const { profileMode, toggleProfile } = useProfile()
   const navigate = useNavigate()
   const location = useLocation()
+  const [showModeTip, setShowModeTip] = useState(() => {
+    return !sessionStorage.getItem("modeTipDismissed")
+  })
+
+  const handleDismissTip = () => {
+    setShowModeTip(false)
+    sessionStorage.setItem("modeTipDismissed", "true")
+  }
+
+  const handleToggleMode = () => {
+    toggleProfile()
+    handleDismissTip()
+  }
 
   // Get current active tab from URL
   const getCurrentTab = () => {
@@ -56,7 +69,7 @@ export default function Pages() {
       {/* Profile Toggle Button with Advanced Animation */}
       <div className="fixed top-4 left-4 z-40 md:block">
         <motion.button
-          onClick={toggleProfile}
+          onClick={handleToggleMode}
           className={`relative overflow-hidden px-3 py-2 md:px-6 md:py-2 rounded-xl font-semibold transition-all duration-500 shadow-lg hover:cursor-pointer text-xs md:text-sm ${
             isProfessional
               ? "bg-gradient-to-r from-slate-700 via-blue-700 to-indigo-700 hover:from-slate-800 hover:via-blue-800 hover:to-indigo-800 text-white"
@@ -255,6 +268,63 @@ export default function Pages() {
             }}
           />
         </motion.button>
+
+        {/* Pointer Toast / Tooltip */}
+        <AnimatePresence>
+          {showModeTip && (
+            <motion.div
+              initial={{ opacity: 0, y: -8, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -6, scale: 0.95 }}
+              transition={{ duration: 0.25 }}
+              className="relative mt-2.5 max-w-[230px] sm:max-w-[260px] filter drop-shadow-xl"
+            >
+              {/* Upward Pointer Arrow */}
+              <div
+                className={`absolute -top-1.5 left-5 w-3 h-3 rotate-45 border-t border-l ${
+                  isProfessional
+                    ? "bg-slate-900/95 border-blue-400/30"
+                    : "bg-slate-900/95 border-pink-400/30"
+                }`}
+              ></div>
+
+              {/* Toast Card */}
+              <div
+                className={`relative backdrop-blur-xl border rounded-2xl p-3 text-white shadow-2xl flex items-start gap-2.5 ${
+                  isProfessional
+                    ? "bg-slate-900/95 border-blue-400/30 shadow-blue-950/40"
+                    : "bg-slate-900/95 border-pink-400/30 shadow-pink-950/40"
+                }`}
+              >
+                <div
+                  className={`p-1.5 rounded-lg shrink-0 mt-0.5 animate-bounce ${
+                    isProfessional
+                      ? "bg-blue-600 text-white"
+                      : "bg-gradient-to-br from-pink-500 to-purple-600 text-white"
+                  }`}
+                >
+                  <ArrowUp className="w-3.5 h-3.5" />
+                </div>
+                <div className="flex-1 pr-3">
+                  <p className="text-xs font-semibold text-white leading-tight mb-0.5">
+                    Switch Mode
+                  </p>
+                  <p className="text-[11px] text-gray-300 leading-snug">
+                    You can change your profile mode by clicking here!
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleDismissTip}
+                  className="absolute top-2 right-2 text-gray-400 hover:text-white p-1 rounded-md hover:bg-white/10 transition-colors cursor-pointer"
+                  aria-label="Close"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Desktop Top Navigation Bar */}
