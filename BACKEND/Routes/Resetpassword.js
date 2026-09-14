@@ -3,7 +3,7 @@ const router = express.Router();
 const crypto = require("crypto");
 const User = require("../Models/User");
 const bcrypt = require("bcrypt");
-const { transporter, SENDER } = require("../config/emailConfig");
+const { sendEmail } = require("../config/emailConfig");
 
 /* =========================
    SEND OTP (FORGOT PASSWORD)
@@ -32,9 +32,8 @@ router.post("/sendotp", async (req, res) => {
     user.otpExpiresAt = Date.now() + 10 * 60 * 1000; // 10 minutes
     await user.save();
 
-    // Send OTP via Brevo SMTP
-    await transporter.sendMail({
-      from: SENDER,
+    // Send OTP via Brevo HTTPS API (port 443, never blocked by Render)
+    await sendEmail({
       to: email,
       subject: "Password Reset Request - TweniQ",
       text: `Hi,

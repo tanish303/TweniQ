@@ -6,7 +6,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
 const upload = require("../config/multerConfig");
-const { transporter, SENDER } = require("../config/emailConfig");
+const { sendEmail } = require("../config/emailConfig");
 
 /* =========================
    SEND OTP
@@ -50,9 +50,8 @@ router.post("/sendotp", async (req, res) => {
       { upsert: true }
     );
 
-    // Send OTP email via Brevo SMTP
-    await transporter.sendMail({
-      from: SENDER,
+    // Send OTP email via Brevo HTTPS API (port 443, never blocked by Render)
+    await sendEmail({
       to: email,
       subject: "Verify Your Email - TweniQ",
       text: `Hi there!
