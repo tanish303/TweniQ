@@ -25,7 +25,7 @@ import ChatPage from "./components/ChatPage";
 import ChatWindow from "./components/ChatWindow";
 import GlobalProfilepage from "./components/GlobalProfilepage";
 
-import ProtectedRoute from "./components/ProtectedRoute";   // 👈 NEW
+import ProtectedRoute from "./components/ProtectedRoute";   // 
 import { AppProvider } from "./context/AppContext";
 
 function App() {

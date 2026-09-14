@@ -150,7 +150,7 @@ const Signup = () => {
               <>
                 <div>
                   <label className="text-sm font-semibold text-gray-700">Enter OTP</label>
-                  <input
+                  <input 
                     type="text"
                     value={otp}
                     onChange={(e) => setOtp(e.target.value)}

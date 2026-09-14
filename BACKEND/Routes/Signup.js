@@ -1,15 +1,12 @@
 const express = require("express");
 const router = express.Router();
-const { Resend } = require("resend");
 const crypto = require("crypto");
 const User = require("../Models/User");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
 const upload = require("../config/multerConfig");
-
-// Initialize Resend
-const resend = new Resend(process.env.RESEND_API_KEY);
+const { transporter, SENDER } = require("../config/emailConfig");
 
 /* =========================
    SEND OTP
@@ -53,14 +50,14 @@ router.post("/sendotp", async (req, res) => {
       { upsert: true }
     );
 
-    // Send OTP email via Resend (NO SMTP)
-    await resend.emails.send({
-      from: "TweniQ <onboarding@resend.dev>", // default Resend sender
+    // Send OTP email via Brevo SMTP
+    await transporter.sendMail({
+      from: SENDER,
       to: email,
-      subject: "Verify Your Email",
+      subject: "Verify Your Email - TweniQ",
       text: `Hi there!
 
-Your One-Time Password (OTP) is: ${otp}
+Your One-Time Password (OTP) for TweniQ registration is: ${otp}
 
 This OTP is valid for 10 minutes.
 
@@ -68,12 +65,27 @@ If you didn’t request this, you can safely ignore this email.
 
 Thanks,
 The TweniQ Team`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 24px; border: 1px solid #e0e0e0; border-radius: 12px; background-color: #ffffff;">
+          <h2 style="color: #4f46e5; text-align: center; margin-bottom: 8px;">TweniQ</h2>
+          <p style="text-align: center; color: #6b7280; font-size: 14px; margin-top: 0;">Email Verification</p>
+          <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 16px 0;" />
+          <p style="color: #374151; font-size: 15px;">Hi there,</p>
+          <p style="color: #374151; font-size: 15px;">Please use the verification code below to complete your registration:</p>
+          <div style="background-color: #f3f4f6; padding: 16px; text-align: center; border-radius: 8px; margin: 20px 0;">
+            <span style="font-size: 30px; font-weight: bold; letter-spacing: 6px; color: #4338ca;">${otp}</span>
+          </div>
+          <p style="color: #6b7280; font-size: 13px;">This OTP is valid for 10 minutes. If you did not request this code, you can safely ignore this email.</p>
+          <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;" />
+          <p style="color: #9ca3af; font-size: 12px; text-align: center; margin: 0;">&copy; ${new Date().getFullYear()} TweniQ. All rights reserved.</p>
+        </div>
+      `,
     });
 
     return res.status(200).json({ message: "OTP sent to your email" });
   } catch (error) {
     console.error("Error sending OTP:", error);
-    return res.status(500).json({ message: "Internal server error" });
+    return res.status(500).json({ message: "Failed to send OTP. Please try again." });
   }
 });
 
