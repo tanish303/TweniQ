@@ -195,9 +195,9 @@ const LandingPage = () => {
         {/* Enter as a guest Button */}
         <button
           onClick={() => setShowGuestModal(true)}
-          className="group flex items-center gap-2 px-4 py-2 bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-400/40 hover:border-emerald-400/70 rounded-full text-emerald-300 hover:text-emerald-200 text-xs sm:text-sm font-medium transition-all duration-300 hover:scale-105 shadow-lg shadow-emerald-900/20 cursor-pointer animate-fade-in-status"
+          className="group flex items-center gap-3 px-7 sm:px-9 py-3.5 sm:py-4 bg-emerald-500/25 hover:bg-emerald-500/35 border-2 border-emerald-400/50 hover:border-emerald-400/80 rounded-full text-emerald-300 hover:text-emerald-100 text-base sm:text-lg font-semibold transition-all duration-300 hover:scale-105 shadow-xl shadow-emerald-950/40 cursor-pointer backdrop-blur-md animate-fade-in-status"
         >
-          <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+          <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-emerald-400 rounded-full animate-pulse shadow-sm shadow-emerald-400"></div>
           <span>Enter as a guest</span>
         </button>
       </div>
@@ -233,7 +233,7 @@ const LandingPage = () => {
                 <h3 className="text-lg sm:text-xl font-bold text-white">Guest Access</h3>
               </div>
               <p className="text-xs sm:text-sm text-gray-300 leading-relaxed">
-                you can sign in with already created account if you just wanted to test how this site works or have an eye without creating your own account
+                Want to see how the site works? Sign in with a demo account without creating your own.
               </p>
             </div>
 
