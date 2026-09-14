@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Home, PlusCircle, MessageCircle, User, Briefcase, Heart, ArrowUp, X } from "lucide-react"
+import { Home, PlusCircle, MessageCircle, User, Briefcase, Heart, X } from "lucide-react"
 import { useNavigate, useLocation, Outlet } from "react-router-dom"
 import { useProfile } from "./context/AppContext"
 
@@ -277,7 +277,7 @@ export default function Pages() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -6, scale: 0.95 }}
               transition={{ duration: 0.25 }}
-              className="relative mt-2.5 max-w-[230px] sm:max-w-[260px] filter drop-shadow-xl"
+              className="relative mt-5 max-w-[230px] sm:max-w-[260px] filter drop-shadow-xl"
             >
               {/* Upward Pointer Arrow */}
               <div
@@ -296,15 +296,6 @@ export default function Pages() {
                     : "bg-slate-900/95 border-pink-400/30 shadow-pink-950/40"
                 }`}
               >
-                <div
-                  className={`p-1.5 rounded-lg shrink-0 mt-0.5 animate-bounce ${
-                    isProfessional
-                      ? "bg-blue-600 text-white"
-                      : "bg-gradient-to-br from-pink-500 to-purple-600 text-white"
-                  }`}
-                >
-                  <ArrowUp className="w-3.5 h-3.5" />
-                </div>
                 <div className="flex-1 pr-3">
                   <p className="text-xs font-semibold text-white leading-tight mb-0.5">
                     Switch Mode

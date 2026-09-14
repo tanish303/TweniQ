@@ -30,7 +30,7 @@ const SignIn = () => {
 
   const handleAutoFill = () => {
     setFormData({
-      email: "thisisademoiddd@gmail.com",
+      email: "thisisademomailiddd@gmail.com",
       password: "demo123",
     });
     setShowGuestModal(false);
@@ -94,7 +94,7 @@ const SignIn = () => {
             ></div>
             {/* Modal Card */}
             <div
-              className="relative bg-slate-900/95 backdrop-blur-xl border border-emerald-500/30 rounded-xl sm:rounded-2xl
+              className="relative bg-slate-900/95 backdrop-blur-xl border border-purple-500/30 rounded-xl sm:rounded-2xl
                          shadow-2xl max-w-sm sm:max-w-md w-full p-5 sm:p-6 text-white max-h-[90vh] overflow-y-auto"
             >
               {/* Close Button */}
@@ -110,8 +110,8 @@ const SignIn = () => {
               {/* Modal Header & Message */}
               <div className="pr-6 sm:pr-8 mb-4">
                 <div className="flex items-center gap-2 sm:gap-3 mb-2.5">
-                  <div className="w-9 h-9 sm:w-10 sm:h-10 bg-emerald-500/20 border border-emerald-400/30 rounded-xl flex items-center justify-center">
-                    <UserCheck className="w-5 h-5 text-emerald-400" />
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 bg-purple-500/20 border border-purple-400/30 rounded-xl flex items-center justify-center">
+                    <UserCheck className="w-5 h-5 text-purple-300" />
                   </div>
                   <h3 className="text-lg sm:text-xl font-bold text-white">Guest Access</h3>
                 </div>
@@ -125,17 +125,17 @@ const SignIn = () => {
                 {/* ID */}
                 <div className="flex items-center justify-between gap-2 p-2.5 bg-white/5 rounded-lg border border-white/5">
                   <div className="min-w-0 flex-1">
-                    <span className="text-[11px] font-semibold uppercase tracking-wider text-emerald-400 block">id</span>
+                    <span className="text-[11px] font-semibold uppercase tracking-wider text-purple-400 block">id</span>
                     <span className="text-xs sm:text-sm font-mono text-gray-200 truncate block select-all">
-                      thisisademoiddd@gmail.com
+                      thisisademomailiddd@gmail.com
                     </span>
                   </div>
                   <button
                     type="button"
-                    onClick={() => handleCopy("thisisademoiddd@gmail.com", "id")}
+                    onClick={() => handleCopy("thisisademomailiddd@gmail.com", "id")}
                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 cursor-pointer ${
                       copiedField === "id"
-                        ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/30"
+                        ? "bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg shadow-purple-500/30"
                         : "bg-white/10 hover:bg-white/20 text-gray-200 border border-white/10"
                     }`}
                   >
@@ -156,7 +156,7 @@ const SignIn = () => {
                 {/* Password */}
                 <div className="flex items-center justify-between gap-2 p-2.5 bg-white/5 rounded-lg border border-white/5">
                   <div className="min-w-0 flex-1">
-                    <span className="text-[11px] font-semibold uppercase tracking-wider text-emerald-400 block">pass</span>
+                    <span className="text-[11px] font-semibold uppercase tracking-wider text-purple-400 block">pass</span>
                     <span className="text-xs sm:text-sm font-mono text-gray-200 block select-all">
                       demo123
                     </span>
@@ -166,7 +166,7 @@ const SignIn = () => {
                     onClick={() => handleCopy("demo123", "pass")}
                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 cursor-pointer ${
                       copiedField === "pass"
-                        ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/30"
+                        ? "bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg shadow-purple-500/30"
                         : "bg-white/10 hover:bg-white/20 text-gray-200 border border-white/10"
                     }`}
                   >
@@ -190,7 +190,7 @@ const SignIn = () => {
                 <button
                   type="button"
                   onClick={handleAutoFill}
-                  className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white text-xs sm:text-sm font-semibold rounded-xl transition-all duration-200 shadow-lg shadow-emerald-500/25 cursor-pointer hover:scale-[1.02]"
+                  className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white text-xs sm:text-sm font-semibold rounded-xl transition-all duration-200 shadow-lg shadow-purple-500/25 cursor-pointer hover:scale-[1.02]"
                 >
                   <span>Fill into Sign In Form</span>
                   <ArrowRight className="w-4 h-4" />
@@ -285,9 +285,9 @@ const SignIn = () => {
               <button
                 type="button"
                 onClick={() => setShowGuestModal(true)}
-                className="group w-full py-3 px-5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white rounded-xl text-sm sm:text-base font-semibold shadow-lg shadow-emerald-500/25 hover:shadow-xl hover:scale-[1.01] transition-all duration-300 cursor-pointer flex items-center justify-center gap-2.5"
+                className="group w-full py-3 px-5 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl text-sm sm:text-base font-semibold shadow-lg shadow-purple-500/25 hover:shadow-xl hover:scale-[1.01] transition-all duration-300 cursor-pointer flex items-center justify-center gap-2.5"
               >
-                <div className="w-2.5 h-2.5 bg-emerald-200 rounded-full animate-pulse shadow-sm shadow-emerald-200"></div>
+                <div className="w-2.5 h-2.5 bg-blue-200 rounded-full animate-pulse shadow-sm shadow-blue-200"></div>
                 <span>Enter as a guest</span>
               </button>
             </div>

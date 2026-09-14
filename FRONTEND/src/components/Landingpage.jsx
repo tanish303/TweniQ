@@ -244,12 +244,12 @@ const LandingPage = () => {
                 <div className="min-w-0 flex-1">
                   <span className="text-[11px] font-semibold uppercase tracking-wider text-emerald-400 block">id</span>
                   <span className="text-xs sm:text-sm font-mono text-gray-200 truncate block select-all">
-                    thisisademoiddd@gmail.com
+                    thisisademomailiddd@gmail.com
                   </span>
                 </div>
                 <button
                   type="button"
-                  onClick={() => handleCopy("thisisademoiddd@gmail.com", "id")}
+                  onClick={() => handleCopy("thisisademomailiddd@gmail.com", "id")}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 cursor-pointer ${
                     copiedField === "id"
                       ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/30"
