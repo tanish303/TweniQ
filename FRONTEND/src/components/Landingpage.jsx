@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import { Info, X, ArrowRight, Shield, Zap, Award, CheckCircle } from "lucide-react"
+import { Info, X, ArrowRight, Shield, Zap, Award, CheckCircle, Copy, Check, UserCheck } from "lucide-react"
 import { jwtDecode } from "jwt-decode"
 
 const AppName = import.meta.env.VITE_APP_NAME || "TweniQ"
@@ -10,6 +10,14 @@ const AppName = import.meta.env.VITE_APP_NAME || "TweniQ"
 const LandingPage = () => {
   const navigate = useNavigate()
   const [showInfoModal, setShowInfoModal] = useState(false)
+  const [showGuestModal, setShowGuestModal] = useState(false)
+  const [copiedField, setCopiedField] = useState("")
+
+  const handleCopy = (text, field) => {
+    navigator.clipboard.writeText(text)
+    setCopiedField(field)
+    setTimeout(() => setCopiedField(""), 2000)
+  }
 
   useEffect(() => {
     const token = localStorage.getItem("jwtToken")
@@ -184,12 +192,129 @@ const LandingPage = () => {
           </button>
         </div>
 
-        {/* Status Indicator */}
-        <div className="flex items-center gap-2 text-green-300/70 text-xs sm:text-sm animate-fade-in-status">
-          <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-400 rounded-full animate-pulse"></div>
-          <span className="font-mono">Platform Online</span>
-        </div>
+        {/* Enter as a guest Button */}
+        <button
+          onClick={() => setShowGuestModal(true)}
+          className="group flex items-center gap-2 px-4 py-2 bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-400/40 hover:border-emerald-400/70 rounded-full text-emerald-300 hover:text-emerald-200 text-xs sm:text-sm font-medium transition-all duration-300 hover:scale-105 shadow-lg shadow-emerald-900/20 cursor-pointer animate-fade-in-status"
+        >
+          <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+          <span>Enter as a guest</span>
+        </button>
       </div>
+
+      {/* Guest Access Modal */}
+      {showGuestModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 animate-modal-in">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => setShowGuestModal(false)}
+          ></div>
+          {/* Modal Card */}
+          <div
+            className="relative bg-slate-900/95 backdrop-blur-xl border border-emerald-500/30 rounded-xl sm:rounded-2xl
+                       shadow-2xl max-w-sm sm:max-w-md w-full p-5 sm:p-6 text-white animate-modal-content max-h-[90vh] overflow-y-auto"
+          >
+            {/* Close Button */}
+            <button
+              onClick={() => setShowGuestModal(false)}
+              className="absolute top-3 right-3 sm:top-4 sm:right-4 w-7 h-7 sm:w-8 sm:h-8 bg-white/10 hover:bg-white/20
+                         rounded-full flex items-center justify-center transition-colors cursor-pointer"
+            >
+              <X className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            </button>
+
+            {/* Modal Header & Message */}
+            <div className="pr-6 sm:pr-8 mb-4">
+              <div className="flex items-center gap-2 sm:gap-3 mb-2.5">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 bg-emerald-500/20 border border-emerald-400/30 rounded-xl flex items-center justify-center">
+                  <UserCheck className="w-5 h-5 text-emerald-400" />
+                </div>
+                <h3 className="text-lg sm:text-xl font-bold text-white">Guest Access</h3>
+              </div>
+              <p className="text-xs sm:text-sm text-gray-300 leading-relaxed">
+                you can sign in with already created account if you just wanted to test how this site works or have an eye without creating your own account
+              </p>
+            </div>
+
+            {/* Credentials Box */}
+            <div className="space-y-3 bg-black/40 border border-white/10 rounded-xl p-3.5 sm:p-4">
+              {/* ID */}
+              <div className="flex items-center justify-between gap-2 p-2.5 bg-white/5 rounded-lg border border-white/5">
+                <div className="min-w-0 flex-1">
+                  <span className="text-[11px] font-semibold uppercase tracking-wider text-emerald-400 block">id</span>
+                  <span className="text-xs sm:text-sm font-mono text-gray-200 truncate block select-all">
+                    thisisademoiddd@gmail.com
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleCopy("thisisademoiddd@gmail.com", "id")}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 cursor-pointer ${
+                    copiedField === "id"
+                      ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/30"
+                      : "bg-white/10 hover:bg-white/20 text-gray-200 border border-white/10"
+                  }`}
+                >
+                  {copiedField === "id" ? (
+                    <>
+                      <Check className="w-3.5 h-3.5" />
+                      <span>Copied</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-3.5 h-3.5" />
+                      <span>Copy</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
+              {/* Password */}
+              <div className="flex items-center justify-between gap-2 p-2.5 bg-white/5 rounded-lg border border-white/5">
+                <div className="min-w-0 flex-1">
+                  <span className="text-[11px] font-semibold uppercase tracking-wider text-emerald-400 block">pass</span>
+                  <span className="text-xs sm:text-sm font-mono text-gray-200 block select-all">
+                    demo123
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleCopy("demo123", "pass")}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 cursor-pointer ${
+                    copiedField === "pass"
+                      ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/30"
+                      : "bg-white/10 hover:bg-white/20 text-gray-200 border border-white/10"
+                  }`}
+                >
+                  {copiedField === "pass" ? (
+                    <>
+                      <Check className="w-3.5 h-3.5" />
+                      <span>Copied</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-3.5 h-3.5" />
+                      <span>Copy</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* Action button */}
+            <div className="mt-5">
+              <button
+                onClick={() => navigate("/signin")}
+                className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white text-xs sm:text-sm font-semibold rounded-xl transition-all duration-200 shadow-lg shadow-emerald-500/25 cursor-pointer hover:scale-[1.02]"
+              >
+                <span>Go to Sign In</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Info Modal */}
       {showInfoModal && (
